@@ -1,0 +1,23 @@
+{
+  "name": "prasi-srv",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch internal/supervisor.ts --dev"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/lodash.get": "^4.4.9",
+    "@types/lodash.set": "^4.3.9",
+    "dayjs": "^1.11.13",
+    "fs-jetpack": "^5.1.0",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
+    "msgpackr": "^1.11.2"
+  }
+}
