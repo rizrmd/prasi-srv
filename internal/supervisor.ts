@@ -1,10 +1,10 @@
 import { c } from "utils/color";
 import { config } from "utils/config";
 import { fs } from "utils/fs";
-import { startup } from "utils/global";
+import { g, startup } from "utils/global";
 import { siteLog } from "utils/log";
+import { prasi_content_deploy } from "./content/content-deploy";
 import { ensureDBReady } from "./db/ensure";
-import { ensureDeployExists } from "./deploy/ensure";
 import { ensureServerReady } from "./server/ensure";
 import { startServer } from "./server/start";
 
@@ -18,10 +18,14 @@ startup("supervisor", async () => {
     siteLog("No Site Loaded");
   } else {
     siteLog(`Site ID: ${site_id}`);
-    await ensureDeployExists(site_id);
+
+    if (g.server.mode === "deploy") {
+      await prasi_content_deploy.prepare(site_id);
+    }
+
     await ensureServerReady(is_dev);
     await ensureDBReady();
 
-    startServer(is_dev);
+    startServer(is_dev, site_id);
   }
 });
