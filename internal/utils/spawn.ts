@@ -1,6 +1,7 @@
 import { spawn as bunSpawn, type Subprocess } from "bun";
 import { Readable } from "node:stream";
 
+export type PrasiSpawn = ReturnType<typeof spawn>;
 export const spawn = (
   arg: {
     cmd: string;

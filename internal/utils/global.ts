@@ -1,8 +1,8 @@
-import { join, resolve } from "path";
-import { fs } from "./fs";
-import type { SiteConfig } from "./config";
-import type { spawn } from "./spawn";
 import type { Server } from "bun";
+import { join, resolve } from "path";
+import type { SiteConfig } from "./config";
+import { fs } from "./fs";
+import type { PrasiSpawn, spawn } from "./spawn";
 
 if (!(globalThis as any).prasi) {
   (globalThis as any).prasi = {};
@@ -10,45 +10,50 @@ if (!(globalThis as any).prasi) {
 
 export const g = (globalThis as any).prasi as unknown as {
   dir: { root: string };
-  mode: "supervisor" | "site";
-  server:
-    | { mode: "deploy"; process: ReturnType<typeof spawn> }
-    | { mode: "ipc"; bun_server: Server };
-  site?: {
-    db?: SiteConfig["db"];
-    layouts: {
-      id: string;
-      name: string;
-      url: string;
-      content_tree: any;
-      is_default_layout: boolean;
-    }[];
-    pages: {
-      id: string;
-      name: string;
-      url: string;
-      content_tree: any;
-    }[];
-    comps: {
-      id: string;
-      content_tree: any;
-    }[];
-    info: {
-      id: string;
-      name: string;
-      config?: {
-        api_url: string;
+} & (
+  | {
+      mode: "site";
+      server: Server;
+      ipc: boolean;
+      site: {
+        db?: SiteConfig["db"];
+        layouts: {
+          id: string;
+          name: string;
+          url: string;
+          content_tree: any;
+          is_default_layout: boolean;
+        }[];
+        pages: {
+          id: string;
+          name: string;
+          url: string;
+          content_tree: any;
+        }[];
+        comps: {
+          id: string;
+          content_tree: any;
+        }[];
+        info: {
+          id: string;
+          name: string;
+          config?: {
+            api_url: string;
+          };
+          responsive: string;
+          domain: string;
+        };
       };
-      responsive: string;
-      domain: string;
-    };
-  };
-};
+    }
+  | {
+      mode: "supervisor";
+      supervisor: { process: PrasiSpawn };
+    }
+);
 
 export const startup = (mode: "supervisor" | "site", fn: () => void) => {
   g.dir = { root: "" };
   g.mode = mode;
-  g.server.mode = process.argv.includes("--ipc") ? "ipc" : "deploy";
 
   if (mode === "supervisor") {
     const argv = process.argv.filter((e) => !e.startsWith("--"));

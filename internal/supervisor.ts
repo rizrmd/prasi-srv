@@ -9,6 +9,7 @@ import { ensureServerReady } from "./server/ensure";
 import { startServer } from "./server/start";
 
 const is_dev = process.argv.includes("--dev");
+const is_ipc = process.argv.includes("--ipc");
 startup("supervisor", async () => {
   console.log(`${c.green}Prasi Server:${c.esc} ${fs.path("site:")}`);
   await config.init("site:site.json");
@@ -19,13 +20,21 @@ startup("supervisor", async () => {
   } else {
     siteLog(`Site ID: ${site_id}`);
 
-    if (g.server.mode === "deploy") {
+    if (!is_ipc) {
       await prasi_content_deploy.prepare(site_id);
     }
 
     await ensureServerReady(is_dev);
     await ensureDBReady();
 
-    startServer(is_dev, site_id);
+    if (is_ipc) {
+      g.mode = "site";
+      if (g.mode === "site") g.ipc = true;
+    }
+
+    startServer({
+      site_id,
+      mode: is_dev ? "dev" : "prod",
+    });
   }
 });

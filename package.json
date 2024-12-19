@@ -3,7 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch internal/supervisor.ts --dev"
+    "dev": "bun run --watch internal/supervisor.ts --dev",
+    "ipc": "bun run --watch internal/supervisor.ts --dev --ipc"
   },
   "devDependencies": {
     "@types/bun": "latest"
