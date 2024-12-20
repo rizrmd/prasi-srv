@@ -14,29 +14,24 @@ startup("supervisor", async () => {
   console.log(`${c.green}Prasi Server:${c.esc} ${fs.path("site:")}`);
   await config.init("site:site.json");
 
-  const site_id = config.get("site_id") as string;
-  if (!site_id) {
-    siteLog("No Site Loaded");
-  } else {
-    siteLog(`Site ID: ${site_id}`);
+  if (!is_ipc) {
+    const site_id = config.get("site_id") as string;
+    await prasi_content_deploy.prepare(site_id);
 
-    if (!is_ipc) {
-      await prasi_content_deploy.prepare(site_id);
-    }
-
-    await ensureServerReady(is_dev);
-    await ensureDBReady();
-
-    if (is_ipc) {
-      g.mode = "site";
-      if (g.mode === "site") g.ipc = true;
+    if (!site_id) {
+      siteLog("No Site Loaded");
     } else {
-      
+      siteLog(`Site ID: ${site_id}`);
     }
-
-    startServer({
-      site_id,
-      mode: is_dev ? "dev" : "prod",
-    });
+    await ensureDBReady();
+  } else {
+    g.mode = "site";
+    if (g.mode === "site") g.ipc = true;
   }
+
+  await ensureServerReady(is_dev);
+
+  startServer({
+    mode: is_dev ? "dev" : "prod",
+  });
 });

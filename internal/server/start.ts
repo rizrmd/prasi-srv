@@ -2,7 +2,7 @@ import { fs } from "utils/fs";
 import { g } from "utils/global";
 import { spawn } from "utils/spawn";
 
-export const startServer = (arg: { site_id: string; mode: "dev" | "prod" }) => {
+export const startServer = (arg: { mode: "dev" | "prod" }) => {
   if (g.mode === "supervisor") {
     g.supervisor = {
       process: spawn({
