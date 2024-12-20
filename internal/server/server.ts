@@ -18,7 +18,9 @@ startup("site", async () => {
             g.server = Bun.serve({
               fetch(request, server) {},
               websocket: { message(ws, message) {} },
+              port: 0,
             });
+            ipcSend({ type: "ready", port: g.server.port });
           }
         }
       });
