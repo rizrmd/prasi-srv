@@ -7,7 +7,7 @@ import { fs } from "utils/fs";
 import { g } from "utils/global";
 
 export const loadCurrentDeploy = async (ts: number) => {
-  if (fs.exists(`site:deploy/current/${ts}.gz`)) {
+  if (fs.exists(`site:deploy/current/${ts}.gz`) && g.mode === "site") {
     await removeAsync(fs.path(`site:deploy/current/files`));
 
     const content = decode(

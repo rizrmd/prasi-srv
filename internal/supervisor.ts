@@ -30,6 +30,8 @@ startup("supervisor", async () => {
     if (is_ipc) {
       g.mode = "site";
       if (g.mode === "site") g.ipc = true;
+    } else {
+      
     }
 
     startServer({
