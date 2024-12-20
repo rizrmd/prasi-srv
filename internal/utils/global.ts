@@ -5,6 +5,7 @@ import { fs } from "./fs";
 import type { PrasiSpawn, spawn } from "./spawn";
 import type { prasi_content_ipc } from "../content/content-ipc";
 import type { prasi_content_deploy } from "../content/content-deploy";
+import type { StaticFile } from "./static";
 
 if (!(globalThis as any).prasi) {
   (globalThis as any).prasi = {};
@@ -16,7 +17,10 @@ export const g = (globalThis as any).prasi as unknown as {
   | {
       mode: "site";
       server: Server;
-      ipc: boolean;
+      ipc?: {
+        asset?: StaticFile;
+      };
+      static_cache: any;
       content: typeof prasi_content_ipc & typeof prasi_content_deploy;
       site?: {
         db?: SiteConfig["db"];

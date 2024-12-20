@@ -1,15 +1,9 @@
+import type { ServerCtx } from "utils/server-ctx";
+
 export type PrasiContent = {
   prepare: (site_id: string) => void | Promise<void>;
-  page_urls: () => Promise<Record<string, string>>;
-  pages: (page_ids: string[]) => Promise<IPage[]>;
-  comps: (comp_ids: string[]) => Promise<IComp[]>;
-  layouts: () => Promise<ILayout[]>;
-  file: (
-    url: string,
-    options?: {
-      accept: ("gzip" | "br" | "zstd")[];
-    }
-  ) => Promise<{ body: any; compression: "none" | "gzip" | "br" | "zstd" }>;
+  staticFile: (ctx: ServerCtx) => Promise<Response | void>;
+  route: (ctx: ServerCtx) => Promise<Response | void>;
 };
 
 export type ILayout = {

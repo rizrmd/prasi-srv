@@ -26,7 +26,7 @@ startup("supervisor", async () => {
     await ensureDBReady();
   } else {
     g.mode = "site";
-    if (g.mode === "site") g.ipc = true;
+    if (g.mode === "site") g.ipc = {};
   }
 
   await ensureServerReady(is_dev);

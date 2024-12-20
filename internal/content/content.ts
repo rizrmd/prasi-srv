@@ -1,5 +1,5 @@
 import { g } from "utils/global";
 
-export const PrasiContent = () => {
+export const prasiContent = () => {
   return g.mode === "site" ? g.content : null;
 };

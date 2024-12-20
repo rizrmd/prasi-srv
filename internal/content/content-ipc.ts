@@ -1,22 +1,18 @@
+import { g } from "utils/global";
 import type { PrasiContent } from "./types";
 
 export const prasi_content_ipc: PrasiContent = {
   prepare(site_id) {
     console.log("mantap jiwa");
   },
-  async comps(comp_ids) {
-    return [];
+  async staticFile(ctx) {
+    const asset = g.mode === "site" && g.ipc?.asset!;
+    if (asset) {
+      const response = asset.serve(ctx);
+      if (response) {
+        return response;
+      }
+    }
   },
-  async file(url, options) {
-    return { body: "", compression: "none" };
-  },
-  async layouts() {
-    return [];
-  },
-  async page_urls() {
-    return {};
-  },
-  async pages(page_ids) {
-    return [];
-  },
+  async route(ctx) {},
 };
