@@ -4,9 +4,14 @@ import { fs } from "utils/fs";
 import { siteLog } from "utils/log";
 
 export const downloadDeployedSite = async (site_id: string) => {
+  if (!site_id) {
+    siteLog(`No site_id defined in site/site.json`);
+    return 0;
+  }
+
   let base_url = "https://prasi.avolut.com";
   const ts = Date.now();
-  siteLog("Downloading site deploy: ");
+  siteLog(`Downloading site [${site_id}] deploy: `);
   await downloadFile(
     `${base_url}/prod-zip/${site_id}?ts=${ts}&msgpack=1`,
     fs.path(`site:deploy/history/${ts}.gz`),

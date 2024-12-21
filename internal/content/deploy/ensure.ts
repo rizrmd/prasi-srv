@@ -3,6 +3,7 @@ import { fs } from "utils/fs";
 import { downloadDeployedSite } from "./download";
 
 export const ensureDeployExists = async (site_id: string) => {
+  if (!site_id) return 0;
   let download_deploy = false;
   const ts = config.current?.deploy.current;
   if (!ts) {

@@ -19,17 +19,16 @@ startup("supervisor", async () => {
     await prasi_content_deploy.prepare(site_id);
 
     if (!site_id) {
-      siteLog("No Site Loaded");
+      siteLog(`Warning: site_id is empty. Please set it in site.json`);
     } else {
       siteLog(`Site ID: ${site_id}`);
     }
     await ensureDBReady();
+    await ensureServerReady(is_dev);
   } else {
     g.mode = "site";
     if (g.mode === "site") g.ipc = {};
   }
-
-  await ensureServerReady(is_dev);
 
   startServer({
     mode: is_dev ? "dev" : "prod",

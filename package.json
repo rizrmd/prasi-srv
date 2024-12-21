@@ -3,8 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch internal/supervisor.ts --dev",
-    "ipc": "bun run --hot internal/supervisor.ts --dev --ipc"
+    "dev": "bun run --watch --no-clear-screen internal/supervisor.ts --dev",
+    "ipc": "bun run --hot --no-clear-screen internal/supervisor.ts --dev --ipc"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -23,6 +23,7 @@
     "lodash.set": "^4.3.2",
     "mime": "^4.0.6",
     "msgpackr": "^1.11.2",
-    "rou3": "^0.5.1"
+    "rou3": "^0.5.1",
+    "uuid": "^11.0.3"
   }
 }

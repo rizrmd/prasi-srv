@@ -14,7 +14,7 @@ export const ensureServerReady = async (is_dev: boolean) => {
   if (is_dev) {
     const rebuild = async () => {
       try {
-        await $`bun build --watch --target bun --entry ${fs.path(
+        await $`bun build --watch --no-clear-screen --target bun --entry ${fs.path(
           "internal:server/server.ts"
         )} --outdir ${fs.path("site:app")} --sourcemap=linked`.quiet();
       } catch (e) {
