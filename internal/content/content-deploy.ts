@@ -14,6 +14,7 @@ export const prasi_content_deploy: PrasiContent = {
       await loadCurrentDeploy(ts);
     }
   },
+  async started() {},
   async staticFile(ctx) {},
   async route(ctx) {},
 };

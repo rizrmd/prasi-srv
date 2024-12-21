@@ -19,7 +19,6 @@ export const prasi_content_ipc: PrasiContent = {
               if (g.mode === "site" && g.ipc) {
                 if (msg.type === "start") {
                   g.ipc.asset = await staticFile(msg.path.asset);
-                  ipcSend({ type: "ready", port: g.server.port });
                   done();
                 }
               }
@@ -28,6 +27,11 @@ export const prasi_content_ipc: PrasiContent = {
         }
       }
     });
+  },
+  async started() {
+    if (g.mode === "site" && g.server) {
+      ipcSend({ type: "ready", port: g.server.port });
+    }
   },
   async staticFile(ctx) {
     const asset = g.mode === "site" && g.ipc?.asset!;

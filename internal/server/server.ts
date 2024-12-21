@@ -8,15 +8,16 @@ import { prasi_content_ipc } from "../content/content-ipc";
 startup("site", async () => {
   await config.init("site:site.json");
   if (g.mode === "site") {
-    g.content = g.ipc ? prasi_content_ipc : prasi_content_deploy;
+    g.prasi = g.ipc ? prasi_content_ipc : prasi_content_deploy;
 
-    const content = g.content;
-    await content.init();
-    startGlobalServer();
+    const prasi = g.prasi;
+    await prasi.init();
+    await startSiteServer();
+    await prasi.started();
   }
 });
 
-const startGlobalServer = async () => {
+const startSiteServer = async () => {
   if (g.mode === "site") {
     g.server = Bun.serve({
       async fetch(req, server) {

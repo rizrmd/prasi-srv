@@ -21,7 +21,7 @@ export const g = (globalThis as any).prasi as unknown as {
         asset?: StaticFile;
       };
       static_cache: any;
-      content: typeof prasi_content_ipc & typeof prasi_content_deploy;
+      prasi: typeof prasi_content_ipc & typeof prasi_content_deploy;
       site?: {
         db?: SiteConfig["db"];
         layouts: {
