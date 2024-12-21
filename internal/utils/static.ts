@@ -48,7 +48,7 @@ export const staticFile = async (
     scanning: false,
     paths: new Set<string>(),
     // rescan will be overwritten below.
-    async rescan(arg?: { immediatly?: boolean }) {},
+    async rescan(arg?: { immediately?: boolean }) {},
     exists(rpath: string, arg?: { prefix?: string; debug?: boolean }) {
       let pathname = rpath;
       if (arg?.prefix && pathname) {
@@ -128,7 +128,7 @@ export const staticFile = async (
   };
   await scan();
 
-  static_file.rescan = (arg?: { immediatly?: boolean }) => {
+  static_file.rescan = (arg?: { immediately?: boolean }) => {
     return new Promise<void>((resolve) => {
       clearTimeout(internal.rescan_timeout);
       internal.rescan_timeout = setTimeout(
@@ -136,7 +136,7 @@ export const staticFile = async (
           await scan();
           resolve();
         },
-        arg?.immediatly ? 0 : 300
+        arg?.immediately ? 0 : 300
       );
     });
   };
