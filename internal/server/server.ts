@@ -4,9 +4,12 @@ import type { ServerCtx } from "utils/server-ctx";
 import { prasiContent } from "../content/content";
 import { prasi_content_deploy } from "../content/content-deploy";
 import { prasi_content_ipc } from "../content/content-ipc";
+import { fs } from "utils/fs";
 
 startup("site", async () => {
   await config.init("site:site.json");
+  fs.init(config.current!);
+
   if (g.mode === "site") {
     g.prasi = g.ipc ? prasi_content_ipc : prasi_content_deploy;
 
@@ -19,6 +22,18 @@ startup("site", async () => {
 
 const startSiteServer = async () => {
   if (g.mode === "site") {
+    let port = 0;
+    if (g.ipc) {
+      try {
+        const runtime = (await fs.read("site:runtime.json", "json")) as {
+          port: number;
+        };
+        port = runtime.port;
+      } catch (e) {}
+    } else {
+      port = config.current?.port || 3000;
+    }
+
     g.server = Bun.serve({
       async fetch(req, server) {
         const content = prasiContent();
@@ -40,7 +55,13 @@ const startSiteServer = async () => {
         }
       },
       websocket: { message(ws, message) {} },
-      port: 0,
+      port,
+      reusePort: true,
     });
+
+    if (g.ipc && g.server.port) {
+      await g.ipc.backend?.server?.init?.({ port: g.server.port });
+      await fs.write("site:runtime.json", { port: g.server.port });
+    }
   }
 };

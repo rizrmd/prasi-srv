@@ -1,6 +1,6 @@
 import type { Server } from "bun";
 import { join, resolve } from "path";
-import type { SiteConfig } from "./config";
+import { config, type SiteConfig } from "./config";
 import { fs } from "./fs";
 import type { PrasiSpawn, spawn } from "./spawn";
 import type { prasi_content_ipc } from "../content/content-ipc";
@@ -75,7 +75,6 @@ export const startup = (mode: "supervisor" | "site", fn: () => void) => {
   } else {
     g.dir.root = join(process.cwd(), "..", "..");
   }
-  fs.init();
 
   fn();
 };

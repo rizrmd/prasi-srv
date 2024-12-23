@@ -7,12 +7,15 @@ import { prasi_content_deploy } from "./content/content-deploy";
 import { ensureDBReady } from "./db/ensure";
 import { ensureServerReady } from "./server/ensure";
 import { startServer } from "./server/start";
+import { removeAsync } from "fs-jetpack";
 
 const is_dev = process.argv.includes("--dev");
 const is_ipc = process.argv.includes("--ipc");
 startup("supervisor", async () => {
   console.log(`${c.green}Prasi Server:${c.esc} ${fs.path("site:")}`);
   await config.init("site:site.json");
+  await removeAsync(fs.path(`site:runtime.json`));
+  fs.init(config.current!);
 
   if (!is_ipc) {
     const site_id = config.get("site_id") as string;
