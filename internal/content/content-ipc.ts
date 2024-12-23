@@ -3,6 +3,7 @@ import { g } from "utils/global";
 import { staticFile } from "utils/static";
 import { ipcSend } from "./ipc/send";
 import type { PrasiContent } from "./types";
+import { rewriteResponse } from "utils/rewrite-response";
 export const prasi_content_ipc: PrasiContent = {
   prepare(site_id) {},
   init() {
@@ -50,15 +51,6 @@ export const prasi_content_ipc: PrasiContent = {
       ipcSend({ type: "ready", port: g.server.port });
     }
   },
-  async staticFile(ctx) {
-    const asset = g.mode === "site" && g.ipc?.frontend!;
-    if (asset) {
-      const response = asset.serve(ctx);
-      if (response) {
-        return response;
-      }
-    }
-  },
   async route(ctx) {
     if (g.mode === "site" && g.ipc) {
       const server = g.ipc.backend?.server;
@@ -69,6 +61,20 @@ export const prasi_content_ipc: PrasiContent = {
           server: ctx.server,
           mode: "prod",
           async handle(req, opt) {
+            const asset = g.mode === "site" && g.ipc?.frontend!;
+
+            if (asset) {
+              const route = asset.exists(ctx.url.pathname);
+              if (route) {
+                return rewriteResponse(Bun.file(route.data.fullpath), {
+                  headers: {
+                    "content-type": route.data.mime,
+                  },
+                  opt,
+                });
+              }
+            }
+
             return new Response("handle", {
               status: 404,
             });

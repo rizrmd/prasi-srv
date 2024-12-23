@@ -4,7 +4,6 @@ export type PrasiContent = {
   prepare: (site_id: string) => void | Promise<void>;
   init: () => Promise<void>;
   started: () => Promise<void>;
-  staticFile: (ctx: ServerCtx) => Promise<Response | void>;
   route: (ctx: ServerCtx) => Promise<Response | void>;
 };
 

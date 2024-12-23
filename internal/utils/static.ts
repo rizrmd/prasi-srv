@@ -47,15 +47,15 @@ export const staticFile = async (
   const static_file = {
     scanning: false,
     paths: new Set<string>(),
-    // rescan will be overwritten below.
-    async rescan(arg?: { immediately?: boolean }) {},
+    async rescan(arg?: { immediately?: boolean }) {
+      // rescan will be overwritten after static_file definition.
+    },
     exists(rpath: string, arg?: { prefix?: string; debug?: boolean }) {
       let pathname = rpath;
       if (arg?.prefix && pathname) {
         pathname = pathname.substring(arg.prefix.length);
       }
-      const found = findRoute(internal.router, undefined, path + pathname);
-      return !!found;
+      return findRoute(internal.router, undefined, pathname);
     },
     serve: (ctx: ServerCtx, arg?: { prefix?: string; debug?: boolean }) => {
       let pathname = ctx.url.pathname || "";

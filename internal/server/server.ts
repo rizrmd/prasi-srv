@@ -31,11 +31,6 @@ const startSiteServer = async () => {
             url: { pathname, raw: url },
           };
 
-          const response = await content.staticFile(ctx);
-          if (response) {
-            return response;
-          }
-
           const routed = await content.route(ctx);
           if (routed) {
             return routed;
