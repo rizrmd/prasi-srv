@@ -3,7 +3,7 @@ import { dirAsync, existsAsync } from "fs-jetpack";
 import { format, parse, dirname } from "path";
 import { apiContext } from "utils/api-context";
 import { dir } from "utils/dir";
-import { g } from "utils/global";
+import { prasi } from "../prasi";
 
 export const _ = {
   url: "/_upload",
@@ -57,7 +57,7 @@ const saveFile = async (
     dirAsync(dirname(to));
   }
 
-  while (await Bun.file(dir(`${g.datadir}/files/${to}`)).exists()) {
+  while (await Bun.file(dir(`${prasi.datadir}/files/${to}`)).exists()) {
     const p = parse(to);
     const arr = p.name.split("-");
     if (arr.length > 1) {
@@ -74,6 +74,6 @@ const saveFile = async (
 
     to = format(p);
   }
-  await Bun.write(dir(`${g.datadir}/files/${to}`), part);
+  await Bun.write(dir(`${prasi.datadir}/files/${to}`), part);
   return to;
 };

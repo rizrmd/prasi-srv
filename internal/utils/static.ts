@@ -6,8 +6,8 @@ import mime from "mime";
 import { readFileSync } from "node:fs";
 import { join } from "path";
 import { addRoute, createRouter, findRoute } from "rou3";
-import type { ServerCtx } from "./server-ctx";
-import { g } from "./global";
+import type { ServerCtx } from "typings/server";
+import { prasi } from "../prasi";
 import { waitUntil } from "./wait-until";
 
 await zstd.init();
@@ -17,21 +17,19 @@ export const staticFile = async (
   path: string,
   opt?: { index?: string; debug?: boolean }
 ) => {
-  if (g.mode !== "site") return;
+  if (!prasi.static_cache) {
+    prasi.static_cache = {} as any;
 
-  if (!g.static_cache) {
-    g.static_cache = {} as any;
-
-    if (!g.static_cache.gz) {
-      g.static_cache.gz = new BunSqliteKeyValue(":memory:");
+    if (!prasi.static_cache.gz) {
+      prasi.static_cache.gz = new BunSqliteKeyValue(":memory:");
     }
 
-    if (!g.static_cache.zstd) {
-      g.static_cache.zstd = new BunSqliteKeyValue(":memory:");
+    if (!prasi.static_cache.zstd) {
+      prasi.static_cache.zstd = new BunSqliteKeyValue(":memory:");
     }
   }
 
-  const store = g.static_cache;
+  const store = prasi.static_cache;
 
   const glob = new Glob("**");
 

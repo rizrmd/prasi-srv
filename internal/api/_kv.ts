@@ -1,7 +1,7 @@
 import { BunSqliteKeyValue } from "pkgs/utils/kv";
 import { apiContext } from "utils/api-context";
 import { dir } from "utils/dir";
-import { g } from "utils/global";
+import { prasi } from "../prasi";
 
 export const _ = {
   url: "/_kv",
@@ -9,8 +9,8 @@ export const _ = {
   async api(mode: "get" | "set" | "del", key: string, value?: any) {
     const { req } = apiContext(this);
 
-    if (!g.kv) {
-      g.kv = new BunSqliteKeyValue(dir(`${g.datadir}/db-kv.sqlite`));
+    if (!prasi.kv) {
+      prasi.kv = new BunSqliteKeyValue(dir(`${prasi.datadir}/db-kv.sqlite`));
     }
 
     try {
@@ -18,7 +18,7 @@ export const _ = {
       switch (parts[0]) {
         case "set": {
           if (typeof parts[1] === "string") {
-            g.kv.set(parts[1], parts[2]);
+            prasi.kv.set(parts[1], parts[2]);
 
             return new Response(JSON.stringify({ status: "ok" }), {
               headers: { "content-type": "application/json" },
@@ -34,16 +34,16 @@ export const _ = {
         }
         case "get": {
           if (parts[2]) {
-            g.kv.set(parts[1], parts[2]);
+            prasi.kv.set(parts[1], parts[2]);
           }
 
-          return new Response(JSON.stringify(g.kv.get(parts[1]) || null), {
+          return new Response(JSON.stringify(prasi.kv.get(parts[1]) || null), {
             headers: { "content-type": "application/json" },
           });
         }
         case "del": {
           if (parts[1]) {
-            g.kv.delete(parts[1]);
+            prasi.kv.delete(parts[1]);
 
             return new Response(JSON.stringify({ status: "ok" }), {
               headers: { "content-type": "application/json" },

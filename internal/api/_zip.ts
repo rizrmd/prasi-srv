@@ -4,21 +4,21 @@ import { copyAsync } from "fs-jetpack";
 import mime from "mime";
 import { deploy } from "utils/deploy";
 import { dir } from "utils/dir";
-import { g, SinglePage } from "utils/global";
+import { prasi, SinglePage } from "../prasi";
 import { getContent } from "../server/prep-api-ts";
 
 export const _ = {
   url: "/_zip",
   raw: true,
   async api() {
-    await $`rm bundle*`.nothrow().quiet().cwd(`${g.datadir}`);
+    await $`rm bundle*`.nothrow().quiet().cwd(`${prasi.datadir}`);
     await copyAsync(
       dir(`pkgs/empty_bundle.sqlite`),
-      dir(`${g.datadir}/bundle.sqlite`)
+      dir(`${prasi.datadir}/bundle.sqlite`)
     );
-    const db = new Database(dir(`${g.datadir}/bundle.sqlite`));
+    const db = new Database(dir(`${prasi.datadir}/bundle.sqlite`));
 
-    const ts = g.deploy.config.deploy.ts;
+    const ts = prasi.deploy.config.deploy.ts;
     const add = ({
       path,
       type,
@@ -33,8 +33,8 @@ export const _ = {
           "INSERT INTO files (path, type, content) VALUES ($path, $type, $content)"
         );
         query.run({
-          $path: path.startsWith(g.datadir)
-            ? path.substring(`${g.datadir}/bundle`.length)
+          $path: path.startsWith(prasi.datadir)
+            ? path.substring(`${prasi.datadir}/bundle`.length)
             : path,
           $type: type,
           $content: content,
@@ -47,9 +47,9 @@ export const _ = {
     add({
       path: "base_url",
       type: "",
-      content: g.deploy.content?.site?.config?.api_url || "",
+      content: prasi.deploy.content?.site?.config?.api_url || "",
     });
-    const gz = g.deploy.content;
+    const gz = prasi.deploy.content;
 
     if (gz) {
       let layout = null as null | SinglePage;
@@ -85,10 +85,10 @@ export const _ = {
       });
     }
 
-    for (const [directory, files] of Object.entries(g.deploy.content || {})) {
+    for (const [directory, files] of Object.entries(prasi.deploy.content || {})) {
       if (directory !== "code" && directory !== "site") {
         for (const comp of Object.values(files) as any) {
-          let filepath = `${g.datadir}/bundle/${directory}/${comp.id}.json`;
+          let filepath = `${prasi.datadir}/bundle/${directory}/${comp.id}.json`;
 
           add({
             path: filepath,
@@ -97,7 +97,7 @@ export const _ = {
           });
         }
       } else if (directory === "site") {
-        const filepath = `${g.datadir}/bundle/${directory}.json`;
+        const filepath = `${prasi.datadir}/bundle/${directory}.json`;
         add({
           path: filepath,
           type: mime.getType(filepath) || "text/plain",
@@ -105,7 +105,7 @@ export const _ = {
         });
       } else {
         for (const [filename, content] of Object.entries(files)) {
-          let filepath = `${g.datadir}/bundle/${directory}/${filename}`;
+          let filepath = `${prasi.datadir}/bundle/${directory}/${filename}`;
 
           if (content instanceof Buffer || typeof content === "string") {
             add({
@@ -115,7 +115,7 @@ export const _ = {
             });
           } else {
             for (const [k, v] of Object.entries(content || {})) {
-              filepath = `${g.datadir}/bundle/${directory}/${filename}/${k}`;
+              filepath = `${prasi.datadir}/bundle/${directory}/${filename}/${k}`;
               if (v instanceof Buffer || typeof v === "string") {
                 add({
                   path: filepath,
@@ -138,7 +138,7 @@ export const _ = {
     await $`zip "bundle-${ts}.zip" bundle.sqlite`
       .nothrow()
       .quiet()
-      .cwd(`${g.datadir}`);
-    return new Response(Bun.file(`${g.datadir}/bundle-${ts}.zip`));
+      .cwd(`${prasi.datadir}`);
+    return new Response(Bun.file(`${prasi.datadir}/bundle-${ts}.zip`));
   },
 };

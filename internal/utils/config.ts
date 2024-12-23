@@ -1,28 +1,46 @@
-import { dirAsync } from "fs-jetpack";
-import { fs } from "./fs";
+import { readdirSync } from "fs";
 import get from "lodash.get";
 import set from "lodash.set";
-import { readdirSync } from "fs";
+import { join } from "path";
+import { fs } from "./fs";
+import { prasi } from "../prasi";
 
-export const config = {
-  async init(path: string) {
-    if (!fs.exists(path)) {
-      await fs.write(path, default_config);
-    }
+export const initConfig = async (arg?: {
+  is_ipc: boolean;
+  is_dev: boolean;
+}) => {
+  if (Object.keys(gconf.prasi_config).length === 0) {
+    gconf.prasi_config = { ...default_config };
+  }
+  const config = gconf.prasi_config as typeof default_config;
 
-    const result = await fs.read(path, "json");
-    if (!this.current) {
-      this.current = result as typeof default_config;
-    }
-    this.file_path = path;
+  const path = join(prasi.dir.root, "site", "site.json");
+  if (!fs.exists(path)) {
+    await fs.write(path, default_config);
+  }
+  fs.init(config.current!);
 
-    const deploys = readdirSync(fs.path(`site:deploy/history`));
-    this.current.deploy.history = deploys
-      .filter((e) => e.endsWith(".gz"))
-      .map((e) => parseInt(e.replace(".gz", "")));
+  const result = await fs.read(path, "json");
+  if (!config.current) {
+    config.current = result as SiteConfig;
+  }
 
-    return result as typeof default_config;
-  },
+  const deploys = readdirSync(fs.path(`site:deploy/history`));
+  config.current.deploy.history = deploys
+    .filter((e) => e.endsWith(".gz"))
+    .map((e) => parseInt(e.replace(".gz", "")));
+
+  return result as typeof default_config;
+};
+
+const gconf = global as unknown as { prasi_config: typeof default_config };
+if (!gconf.prasi_config) {
+  gconf.prasi_config = {} as any;
+}
+
+export const config = gconf.prasi_config;
+
+const default_config = {
   get(path: string) {
     return get(this.current, path);
   },
@@ -31,18 +49,19 @@ export const config = {
     await fs.write(this.file_path, this.current);
   },
   file_path: "",
-  current: null as null | typeof default_config,
-};
-
-const default_config = {
-  site_id: "",
-  port: 0,
-  upload_path: "upload",
-  db: { orm: "prisma" as "prisma" | "prasi", url: "" },
-  deploy: {
-    current: 0,
-    history: [] as number[],
+  current: {
+    site_id: "",
+    port: 0,
+    db: { orm: "prisma" as "prisma" | "prasi", url: "" },
+    deploy: {
+      current: 0,
+      history: [] as number[],
+    },
+    dir: {
+      site: "",
+      upload: "",
+    },
   },
 };
 
-export type SiteConfig = typeof default_config;
+export type SiteConfig = (typeof default_config)["current"];

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch --no-clear-screen internal/supervisor.ts --dev",
-    "ipc": "bun run --hot --no-clear-screen internal/supervisor.ts --dev --ipc"
+    "server": "bun run internal/server.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

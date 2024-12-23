@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { fs } from "utils/fs";
 
-export const ensureServerReady = async (is_dev: boolean) => {
+export const ensureSiteFiles = async (is_dev: boolean) => {
   if (!fs.exists("site:app/package.json")) {
     await fs.write(`site:app/package.json`, {
       name: "prasi-app",

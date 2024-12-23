@@ -4,7 +4,7 @@ import { listAsync } from "fs-jetpack";
 import { apiContext } from "utils/api-context";
 
 import { dir } from "utils/dir";
-import { g } from "utils/global";
+import { prasi } from "../prasi";
 
 export const _ = {
   url: "/_notif/:action/:token",
@@ -20,18 +20,18 @@ export const _ = {
       return await listAsync(dir("public"));
     }
 
-    if (!g.firebaseInit) {
-      g.firebaseInit = true;
+    if (!prasi.firebaseInit) {
+      prasi.firebaseInit = true;
 
       try {
-        g.firebase = admin.initializeApp({
+        prasi.firebase = admin.initializeApp({
           credential: admin.credential.cert(dir("public/firebase-admin.json")),
         });
-        g.notif = {
-          db: new Database(dir(`${g.datadir}/notif.sqlite`)),
+        prasi.notif = {
+          db: new Database(dir(`${prasi.datadir}/notif.sqlite`)),
         };
 
-        g.notif.db.exec(`
+        prasi.notif.db.exec(`
           CREATE TABLE IF NOT EXISTS notif (
             token TEXT PRIMARY KEY,
             id TEXT NOT NULL
@@ -42,22 +42,22 @@ export const _ = {
       }
     }
 
-    if (g.firebase) {
+    if (prasi.firebase) {
       switch (action) {
         case "register":
           {
             if (data && data.type === "register" && data.id) {
               if (data.token) {
-                const q = g.notif.db.query(
+                const q = prasi.notif.db.query(
                   `SELECT * FROM notif WHERE token = '${data.token}'`
                 );
                 const result = q.all();
                 if (result.length > 0) {
-                  g.notif.db.exec(
+                  prasi.notif.db.exec(
                     `UPDATE notif SET id = '${data.id}' WHERE token = '${data.token}'`
                   );
                 } else {
-                  g.notif.db.exec(
+                  prasi.notif.db.exec(
                     `INSERT INTO notif VALUES ('${data.token}', '${data.id}')`
                   );
                 }
@@ -72,13 +72,13 @@ export const _ = {
         case "send":
           {
             if (data && data.type === "send") {
-              const q = g.notif.db.query<{ token: string }, any>(
+              const q = prasi.notif.db.query<{ token: string }, any>(
                 `SELECT * FROM notif WHERE id = '${data.id}'`
               );
               let result = q.all();
               for (const c of result) {
                 try {
-                  await g.firebase.messaging().send({
+                  await prasi.firebase.messaging().send({
                     notification: { body: data.body, title: data.title },
                     data: data.data,
                     token: c.token,

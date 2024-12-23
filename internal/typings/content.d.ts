@@ -1,4 +1,4 @@
-import type { ServerCtx } from "utils/server-ctx";
+import type { ServerCtx } from "typings/server";
 
 export type PrasiContent = {
   prepare: (site_id: string) => void | Promise<void>;

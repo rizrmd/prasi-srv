@@ -2,7 +2,7 @@ import { dirAsync } from "fs-jetpack";
 import { apiContext } from "utils/api-context";
 import { stat } from "fs/promises";
 import { dir } from "utils/dir";
-import { g } from "utils/global";
+import { prasi } from "../prasi";
 import { dirname, parse } from "path";
 import sharp from "sharp";
 
@@ -27,7 +27,7 @@ export const _ = {
       .join("/");
 
     try {
-      const filepath = dir(`${g.datadir}/files/${rpath}`);
+      const filepath = dir(`${prasi.datadir}/files/${rpath}`);
       const st = await stat(filepath);
       if (st.isFile()) {
         if (
@@ -53,7 +53,7 @@ export const _ = {
             fit ? `-${fit}` : ""
           }`;
           let file_name = dir(
-            `${g.datadir}/files/upload/thumb/${path}/${rpath}.webp`
+            `${prasi.datadir}/files/upload/thumb/${path}/${rpath}.webp`
           );
           let file = Bun.file(file_name);
           if (!(await file.exists())) {

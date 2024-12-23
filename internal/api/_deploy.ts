@@ -161,9 +161,7 @@ export const _ = {
         break;
       case "deploy":
         {
-          await _config.init("site:site.json");
           await _config.set("site_id", action.id_site);
-          fs.init(config);
 
           return {
             now: Date.now(),
@@ -178,7 +176,6 @@ export const _ = {
           // await deploy.saveConfig();
           // await deploy.load(action.ts);
           // const deploys = fs.readdirSync(dir(`/app/web/deploy`));
-
           // return {
           //   now: Date.now(),
           //   current: parseInt(deploy.config.deploy.ts),

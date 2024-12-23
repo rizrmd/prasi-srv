@@ -1,5 +1,5 @@
 import { apiContext, createResponse } from "service-srv";
-import { SinglePage, g } from "utils/global";
+import { SinglePage, prasi } from "../prasi";
 import { gzipAsync } from "utils/gzip";
 import { getContent } from "../server/prep-api-ts";
 import mime from "mime";
@@ -14,7 +14,7 @@ export const _ = {
     const { req, res } = apiContext(this);
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Headers", "content-type");
-    const gz = g.deploy.content;
+    const gz = prasi.deploy.content;
     const parts = req.params._.split("/");
 
     const action = {
@@ -24,13 +24,13 @@ export const _ = {
       compress: async () => {
         const last = parts.pop();
         if (last === "all") {
-          g.compress.mode = "all";
+          prasi.compress.mode = "all";
         }
         if (last === "only-gz") {
-          g.compress.mode = "only-gz";
+          prasi.compress.mode = "only-gz";
         }
         if (last === "off") {
-          g.compress.mode = "off";
+          prasi.compress.mode = "off";
         }
       },
       code: async () => {
@@ -71,7 +71,7 @@ export const _ = {
         }
       },
       page: async () => {
-        const page = g.deploy.pages[parts[1]];
+        const page = prasi.deploy.pages[parts[1]];
         if (page) {
           const res = createResponse(
             JSON.stringify({
@@ -91,7 +91,7 @@ export const _ = {
         const pages = [];
         if (req.params.ids) {
           for (const id of req.params.ids) {
-            const page = g.deploy.pages[id];
+            const page = prasi.deploy.pages[id];
             if (page) {
               pages.push({
                 id: page.id,
@@ -110,7 +110,7 @@ export const _ = {
         const pending = new Set<string>();
         if (req.params.ids) {
           for (const id of req.params.ids) {
-            const comp = g.deploy.comps[id];
+            const comp = prasi.deploy.comps[id];
             if (comp) {
               comps[id] = comp;
             } else if (cache.comps[id]) {

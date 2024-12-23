@@ -1,7 +1,7 @@
 import mime from "mime";
 import { apiContext } from "utils/api-context";
 import { dir } from "utils/dir";
-import { g } from "utils/global";
+import { prasi } from "../prasi";
 import { readdir, stat } from "fs/promises";
 import { basename, dirname } from "path";
 import {
@@ -26,8 +26,8 @@ export const _ = {
     let res = new Response("NOT FOUND", { status: 404 });
 
     if (Object.keys(req.query_parameters).length > 0) {
-      await dirAsync(dir(`${g.datadir}/files`));
-      const base_dir = dir(`${g.datadir}/files/${rpath}`);
+      await dirAsync(dir(`${prasi.datadir}/files`));
+      const base_dir = dir(`${prasi.datadir}/files/${rpath}`);
       if (typeof req.query_parameters["move"] === "string") {
         if (rpath) {
           let moveto = req.query_parameters["move"];
@@ -39,8 +39,8 @@ export const _ = {
             .join("/");
 
           await moveAsync(
-            dir(`${g.datadir}/files/${rpath}`),
-            dir(`${g.datadir}/files/${moveto}/${basename(rpath)}`)
+            dir(`${prasi.datadir}/files/${rpath}`),
+            dir(`${prasi.datadir}/files/${moveto}/${basename(rpath)}`)
           );
         }
 
@@ -49,7 +49,7 @@ export const _ = {
         });
       } else if (typeof req.query_parameters["del"] === "string") {
         if (rpath) {
-          const base_dir = dir(`${g.datadir}/files/${rpath}`);
+          const base_dir = dir(`${prasi.datadir}/files/${rpath}`);
           if (await existsAsync(base_dir)) {
             const s = await stat(base_dir);
             if (s.isDirectory()) {
@@ -76,11 +76,11 @@ export const _ = {
 
         let newname = "";
         if (rpath) {
-          if (await existsAsync(dir(`${g.datadir}/files/${rpath}`))) {
-            await renameAsync(dir(`${g.datadir}/files/${rpath}`), rename);
+          if (await existsAsync(dir(`${prasi.datadir}/files/${rpath}`))) {
+            await renameAsync(dir(`${prasi.datadir}/files/${rpath}`), rename);
           } else {
             const target = dir(
-              `${g.datadir}/files/${dirname(rpath)}/${rename}`
+              `${prasi.datadir}/files/${dirname(rpath)}/${rename}`
             );
             await dirAsync(target);
           }
@@ -101,7 +101,7 @@ export const _ = {
             (
               await readdir(base_dir)
             ).map(async (e) => {
-              const s = await stat(dir(`${g.datadir}/files/${rpath}/${e}`));
+              const s = await stat(dir(`${prasi.datadir}/files/${rpath}/${e}`));
               files.push({
                 name: e,
                 type: s.isDirectory() ? "dir" : "file",
@@ -120,7 +120,7 @@ export const _ = {
       }
     }
 
-    const path = dir(`${g.datadir}/files/${rpath}`);
+    const path = dir(`${prasi.datadir}/files/${rpath}`);
     const file = Bun.file(path);
 
     if (await file.exists()) {

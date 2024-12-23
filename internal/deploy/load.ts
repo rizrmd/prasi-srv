@@ -4,10 +4,10 @@ import get from "lodash.get";
 import { decode } from "msgpackr";
 import { config } from "utils/config";
 import { fs } from "utils/fs";
-import { g } from "utils/global";
+import { prasi } from "../prasi";
 
 export const loadCurrentDeploy = async (ts: number) => {
-  if (fs.exists(`site:deploy/current/${ts}.gz`) && g.mode === "site") {
+  if (fs.exists(`site:deploy/current/${ts}.gz`)) {
     await removeAsync(fs.path(`site:deploy/current/files`));
 
     const content = decode(
@@ -18,7 +18,7 @@ export const loadCurrentDeploy = async (ts: number) => {
       )
     );
 
-    g.site = {
+    prasi.site = {
       layouts: content.layouts,
       pages: content.pages,
       comps: content.comps,

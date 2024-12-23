@@ -2,7 +2,8 @@
   "exclude": ["site/*"],
   "compilerOptions": {
     "paths": {
-      "utils/*": ["./internal/utils/*"]
+      "utils/*": ["./internal/utils/*"],
+      "typings/*": ["./internal/typings/*"]
     },
 
     // Enable latest features

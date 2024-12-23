@@ -3,10 +3,13 @@ import { dirAsync, removeAsync } from "fs-jetpack";
 import { c } from "utils/color";
 import { config } from "utils/config";
 import { fs } from "utils/fs";
-import { g } from "utils/global";
 import { dbLog } from "utils/log";
 
-export const ensureDBReady = async () => {
+export const ensurePrismaReady = async () => {
+  if (config.current?.db?.orm !== "prisma") {
+    dbLog("Warning: Current DB ORM is not prisma, but forced to use prisma");
+    return;
+  }
   if (!config.current?.db?.url) {
     dbLog("Warning: db.url is empty. Please set it in site.json");
   } else {
