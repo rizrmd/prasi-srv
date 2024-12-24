@@ -1,6 +1,7 @@
 import type { WebSocketHandler } from "bun";
 import type { PrasiServer } from "typings/server";
 import { type SiteConfig } from "utils/config";
+import type { StaticFile } from "utils/static";
 
 if (!(globalThis as any).prasi) {
   (globalThis as any).prasi = {};
@@ -9,6 +10,7 @@ if (!(globalThis as any).prasi) {
 export const prasi = (globalThis as any).prasi as unknown as {
   dir: { root: string };
   static_cache: any;
+  static: StaticFile,
   server?: PrasiServer;
   handler: {
     http: (req: Request) => Promise<Response>;

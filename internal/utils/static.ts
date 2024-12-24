@@ -1,22 +1,21 @@
 import * as zstd from "@bokuweb/zstd-wasm";
-import { Glob, gzipSync } from "bun";
 import { BunSqliteKeyValue } from "bun-sqlite-key-value";
 import { exists, existsAsync } from "fs-jetpack";
+import { prasi } from "main/prasi-var";
 import mime from "mime";
 import { readFileSync } from "node:fs";
 import { join } from "path";
 import { addRoute, createRouter, findRoute } from "rou3";
 import type { ServerCtx } from "typings/server";
-import { prasi } from "../prasi-var";
 import { waitUntil } from "./wait-until";
-
-await zstd.init();
 
 export type StaticFile = Awaited<ReturnType<typeof staticFile>>;
 export const staticFile = async (
   path: string,
   opt?: { index?: string; debug?: boolean }
 ) => {
+  await zstd.init();
+
   if (!prasi.static_cache) {
     prasi.static_cache = {} as any;
 
@@ -31,7 +30,7 @@ export const staticFile = async (
 
   const store = prasi.static_cache;
 
-  const glob = new Glob("**");
+  const glob = new Bun.Glob("**");
 
   const internal = {
     indexPath: "",
@@ -169,7 +168,7 @@ const cachedResponse = (
   if (!content && accept.includes("gz")) {
     content = store.gz.get(file_path);
     if (!content) {
-      content = gzipSync(new Uint8Array(readFileSync(file_path)));
+      content = Bun.gzipSync(new Uint8Array(readFileSync(file_path)));
       store.gz.set(file_path, content);
     }
     headers["content-encoding"] = "gzip";
