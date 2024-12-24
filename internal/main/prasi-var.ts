@@ -1,7 +1,5 @@
 import type { WebSocketHandler } from "bun";
-import type {
-  PrasiServer
-} from "typings/server";
+import type { PrasiServer } from "typings/server";
 import { type SiteConfig } from "utils/config";
 
 if (!(globalThis as any).prasi) {

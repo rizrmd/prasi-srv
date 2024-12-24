@@ -3,8 +3,8 @@ import { prasi } from "main/prasi-var";
 import type { PrasiHttpHandler } from "typings/server";
 
 export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
-  const route: PrasiHttpHandler = async (req, opt) => {
-    return new Response("ok");
+  const handle: PrasiHttpHandler = async (req, opt) => {
+    return new Response("karambol rakus asodina");
   };
 
   const index = {
@@ -15,9 +15,10 @@ export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
 
   const handler: typeof prasi.handler.http = async (req) => {
     const server = prasi.server;
-    if (server) {
-      server.http({
-        handle: route,
+
+    if (server && typeof server.http === "function") {
+      return await server.http({
+        handle,
         index,
         mode,
         prasi: { page_id: "", params: {} },
@@ -27,7 +28,7 @@ export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
       });
     }
 
-    return new Response("Site Not Ready", { status: 503 });
+    return new Response("Page Not Found", { status: 404 });
   };
   return handler;
 };

@@ -15,7 +15,7 @@ export const init = async ({
   server: (server: PrasiServer) => Server;
   mode: "vm" | "server";
 }) => {
-  prasi.dir.root = root_dir;
+  prasi.dir = { root: root_dir };
 
   delete require.cache[script_path];
   prasi.server = require(script_path).server;
@@ -36,11 +36,8 @@ export const init = async ({
     await prasi.server.init({ port: server_instance.port });
   }
 
-  prasi.handler.http = createHttpHandler(
-    server_instance,
-    mode === "vm" ? "dev" : "prod"
-  );
-  prasi.handler.ws = createWsHandler();
+  prasi.handler = {
+    http: createHttpHandler(server_instance, mode === "vm" ? "dev" : "prod"),
+    ws: createWsHandler(),
+  };
 };
-
-prasi;
