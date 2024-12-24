@@ -43,7 +43,12 @@ var prasi = globalThis.prasi;
 // internal/main/handler/http-handler.ts
 var createHttpHandler = (server, mode) => {
   const handle = async (req, opt) => {
-    return new Response("karambol rakus asodina");
+    console.log(opt);
+    let body = "mokodang";
+    if (opt?.rewrite) {
+      body = opt.rewrite({ body, headers: {} });
+    }
+    return new Response(body);
   };
   const index = {
     head: [],

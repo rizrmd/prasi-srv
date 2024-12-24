@@ -4,7 +4,14 @@ import type { PrasiHttpHandler } from "typings/server";
 
 export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
   const handle: PrasiHttpHandler = async (req, opt) => {
-    return new Response("karambol rakus asodina");
+    console.log(opt);
+
+    let body: any = "mokodang";
+    if (opt?.rewrite) {
+      body = opt.rewrite({ body, headers: {} });
+    }
+
+    return new Response(body);
   };
 
   const index = {
