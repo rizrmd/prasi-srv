@@ -3,7 +3,7 @@ import { dirAsync, existsAsync } from "fs-jetpack";
 import { format, parse, dirname } from "path";
 import { apiContext } from "utils/api-context";
 import { dir } from "utils/dir";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 
 export const _ = {
   url: "/_upload",

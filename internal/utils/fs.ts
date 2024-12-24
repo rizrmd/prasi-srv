@@ -1,6 +1,6 @@
 import { mkdirSync, statSync } from "fs";
 import { copyAsync } from "fs-jetpack";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 import { dirname, join } from "path";
 import type { SiteConfig } from "./config";
 const internal = Symbol("internal");

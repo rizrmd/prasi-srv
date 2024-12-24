@@ -1,7 +1,7 @@
 import { BunSqliteKeyValue } from "pkgs/utils/kv";
 import { apiContext } from "utils/api-context";
 import { dir } from "utils/dir";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 
 export const _ = {
   url: "/_kv",

@@ -2,7 +2,7 @@ import { dirAsync } from "fs-jetpack";
 import { apiContext } from "utils/api-context";
 import { stat } from "fs/promises";
 import { dir } from "utils/dir";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 import { dirname, parse } from "path";
 import sharp from "sharp";
 

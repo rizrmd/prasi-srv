@@ -3,7 +3,8 @@
   "compilerOptions": {
     "paths": {
       "utils/*": ["./internal/utils/*"],
-      "typings/*": ["./internal/typings/*"]
+      "typings/*": ["./internal/typings/*"],
+      "main/*": ["./internal/main/*"]
     },
 
     // Enable latest features

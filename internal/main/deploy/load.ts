@@ -4,7 +4,7 @@ import get from "lodash.get";
 import { decode } from "msgpackr";
 import { config } from "utils/config";
 import { fs } from "utils/fs";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 
 export const loadCurrentDeploy = async (ts: number) => {
   if (fs.exists(`site:deploy/current/${ts}.gz`)) {

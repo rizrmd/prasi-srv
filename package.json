@@ -2,10 +2,7 @@
   "name": "prasi-srv",
   "module": "index.ts",
   "type": "module",
-  "scripts": {
-    "dev": "bun run --watch --no-clear-screen internal/supervisor.ts --dev",
-    "server": "bun run internal/server.ts"
-  },
+  "scripts": {},
   "devDependencies": {
     "@types/bun": "latest"
   },

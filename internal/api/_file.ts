@@ -1,7 +1,7 @@
 import mime from "mime";
 import { apiContext } from "utils/api-context";
 import { dir } from "utils/dir";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 import { readdir, stat } from "fs/promises";
 import { basename, dirname } from "path";
 import {

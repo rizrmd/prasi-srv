@@ -4,7 +4,7 @@ import { copyAsync } from "fs-jetpack";
 import mime from "mime";
 import { deploy } from "utils/deploy";
 import { dir } from "utils/dir";
-import { prasi, SinglePage } from "../prasi";
+import { prasi, SinglePage } from "../prasi-var";
 import { getContent } from "../server/prep-api-ts";
 
 export const _ = {

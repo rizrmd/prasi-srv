@@ -4,7 +4,7 @@ import { listAsync } from "fs-jetpack";
 import { apiContext } from "utils/api-context";
 
 import { dir } from "utils/dir";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 
 export const _ = {
   url: "/_notif/:action/:token",

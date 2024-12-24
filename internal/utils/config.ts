@@ -3,7 +3,7 @@ import get from "lodash.get";
 import set from "lodash.set";
 import { join } from "path";
 import { fs } from "./fs";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 
 export const initConfig = async (arg?: {
   is_ipc: boolean;

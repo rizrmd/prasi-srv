@@ -1,5 +1,5 @@
 import type { PrasiServer } from "typings/server";
-import { type SiteConfig } from "./utils/config";
+import { type SiteConfig } from "utils/config";
 
 if (!(globalThis as any).prasi) {
   (globalThis as any).prasi = {};

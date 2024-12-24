@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs";
 import { join } from "path";
 import { addRoute, createRouter, findRoute } from "rou3";
 import type { ServerCtx } from "typings/server";
-import { prasi } from "../prasi";
+import { prasi } from "../prasi-var";
 import { waitUntil } from "./wait-until";
 
 await zstd.init();

@@ -1,5 +1,5 @@
 import { apiContext, createResponse } from "service-srv";
-import { SinglePage, prasi } from "../prasi";
+import { SinglePage, prasi } from "../prasi-var";
 import { gzipAsync } from "utils/gzip";
 import { getContent } from "../server/prep-api-ts";
 import mime from "mime";
