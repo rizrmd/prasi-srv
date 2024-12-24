@@ -1,7 +1,6 @@
+import type { WebSocketHandler } from "bun";
 import type {
-  PrasiHttpHandler,
-  PrasiServer,
-  PrasiWsHandler,
+  PrasiServer
 } from "typings/server";
 import { type SiteConfig } from "utils/config";
 
@@ -14,8 +13,8 @@ export const prasi = (globalThis as any).prasi as unknown as {
   static_cache: any;
   server?: PrasiServer;
   handler: {
-    http: PrasiHttpHandler;
-    ws: PrasiWsHandler;
+    http: (req: Request) => Promise<Response>;
+    ws: WebSocketHandler<{ url: URL }>;
   };
   site?: {
     db?: SiteConfig["db"];

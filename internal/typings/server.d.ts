@@ -10,8 +10,6 @@ export type PrasiHttpHandler = (
   }
 ) => Promise<Response>;
 
-export type PrasiWsHandler = WebSocketHandler<{ url: URL }>;
-
 export interface PrasiServer {
   ws?: PrasiWsHandler;
   http: (arg: {
