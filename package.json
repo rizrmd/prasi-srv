@@ -2,7 +2,9 @@
   "name": "prasi-srv",
   "module": "index.ts",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "dev": "bun build --watch --target bun --entry ./internal/main/init.ts --outfile ./internal/init-compiled.js"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
