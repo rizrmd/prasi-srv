@@ -1,7 +1,8 @@
-import type { PrasiHttpHandler, PrasiServer } from "typings/server";
+import type { PrasiHttpHandler } from "typings/server";
 
-export const createHttpHandler: () => PrasiHttpHandler = () => {
-  return async () => {
+export const createHttpHandler = () => {
+  const handler: PrasiHttpHandler = async () => {
     return new Response("wuwu");
   };
+  return handler;
 };

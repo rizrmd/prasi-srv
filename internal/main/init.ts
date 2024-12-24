@@ -10,6 +10,7 @@ export const init = async ({
   root_dir: string;
   script_path: string;
   port: number;
+  mode: "vm" | "server";
 }) => {
   prasi.dir.root = root_dir;
 
