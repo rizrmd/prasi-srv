@@ -1,3 +1,5 @@
+import { createHttpHandler } from "./handler/http-handler";
+import { createWsHandler } from "./handler/ws-handler";
 import { prasi } from "./prasi-var";
 
 export const init = async ({
@@ -17,4 +19,9 @@ export const init = async ({
   if (prasi.server?.init && port) {
     await prasi.server.init({ port });
   }
+
+  prasi.handler.http = createHttpHandler();
+  prasi.handler.ws = createWsHandler();
 };
+
+prasi;

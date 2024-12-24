@@ -1,4 +1,8 @@
-import type { PrasiServer } from "typings/server";
+import type {
+  PrasiHttpHandler,
+  PrasiServer,
+  PrasiWsHandler,
+} from "typings/server";
 import { type SiteConfig } from "utils/config";
 
 if (!(globalThis as any).prasi) {
@@ -9,6 +13,10 @@ export const prasi = (globalThis as any).prasi as unknown as {
   dir: { root: string };
   static_cache: any;
   server?: PrasiServer;
+  handler: {
+    http: PrasiHttpHandler;
+    ws: PrasiWsHandler;
+  };
   site?: {
     db?: SiteConfig["db"];
     layouts: {
