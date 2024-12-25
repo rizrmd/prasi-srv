@@ -3726,6 +3726,7 @@ var createHttpHandler = (server, mode) => {
     const static_file = prasi.static.exists(url.pathname);
     if (static_file) {
       body = Bun.file(static_file.data.fullpath);
+    } else {
     }
     if (opt?.rewrite) {
       body = opt.rewrite({ body, headers });

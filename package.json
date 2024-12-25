@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@bokuweb/zstd-wasm": "^0.0.22",
+    "@mrleebo/prisma-ast": "^0.12.1",
     "@types/lodash.get": "^4.4.9",
     "@types/lodash.set": "^4.3.9",
     "bun-sqlite-key-value": "^1.13.1",
