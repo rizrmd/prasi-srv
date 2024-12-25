@@ -2,16 +2,17 @@ import type { Server } from "bun";
 import { join } from "path";
 import type { PrasiServer } from "typings/server";
 import { c } from "utils/color";
-import { initConfig } from "utils/config";
 import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi } from "./prasi-var";
+
 export const init = async ({
   site_id,
   server,
   mode,
+  vm_dir,
   prasi: init_prasi,
 }: {
   site_id: string;
@@ -30,8 +31,9 @@ export const init = async ({
       };
     };
   };
+  vm_dir?: string;
   server: (server: PrasiServer) => Server;
-  mode: "vm" | "server";
+  mode: "vm" | "server"; 
 }) => {
   const script_dir = init_prasi.paths.dir.script;
   const script_path = join(script_dir, "index.js");
@@ -41,7 +43,15 @@ export const init = async ({
     upload: init_prasi.paths.dir.upload,
     public: init_prasi.paths.dir.public,
   });
-  await initConfig();
+  // await initConfig(); 
+
+  if (vm_dir) {
+    process.chdir(vm_dir);
+    console.log(__filename, __dirname);
+  }
+  
+  const { api_route } = await import("./handler/api-route");
+  await api_route.init();
 
   prasi.static = await staticFile(script_dir);
 
@@ -61,7 +71,6 @@ export const init = async ({
   }
 
   const server_instance = server(prasi.server);
-  console.log(JSON.stringify(init_prasi, null, 2), script_dir);
 
   console.log(`${c.magenta}[SITE]${c.esc} ${site_id} Backend Started.`);
 
