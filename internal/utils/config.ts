@@ -3,34 +3,30 @@ import get from "lodash.get";
 import set from "lodash.set";
 import { join } from "path";
 import { fs } from "./fs";
-import { prasi } from "../prasi-var";
+import { prasi } from "main/prasi-var";
 
-export const initConfig = async (arg?: {
-  is_ipc: boolean;
-  is_dev: boolean;
-}) => {
+export const initConfig = async () => {
   if (Object.keys(gconf.prasi_config).length === 0) {
     gconf.prasi_config = { ...default_config };
   }
   const config = gconf.prasi_config as typeof default_config;
 
-  const path = join(prasi.dir.root, "site", "site.json");
-  if (!fs.exists(path)) {
-    await fs.write(path, default_config);
-  }
-  fs.init(config.current!);
+  // const path = join(prasi.dir.root, "site", "site.json");
+  // if (!fs.exists(path)) {
+  //   await fs.write(path, default_config);
+  // }
 
-  const result = await fs.read(path, "json");
-  if (!config.current) {
-    config.current = result as SiteConfig;
-  }
+  // const result = await fs.read(path, "json");
+  // if (!config.current) {
+  //   config.current = result as SiteConfig;
+  // }
 
-  const deploys = readdirSync(fs.path(`site:deploy/history`));
-  config.current.deploy.history = deploys
-    .filter((e) => e.endsWith(".gz"))
-    .map((e) => parseInt(e.replace(".gz", "")));
+  // const deploys = readdirSync(fs.path(`site:deploy/history`));
+  // config.current.deploy.history = deploys
+  //   .filter((e) => e.endsWith(".gz"))
+  //   .map((e) => parseInt(e.replace(".gz", "")));
 
-  return result as typeof default_config;
+  // return result as typeof default_config;
 };
 
 const gconf = global as unknown as { prasi_config: typeof default_config };

@@ -8,7 +8,6 @@ if (!(globalThis as any).prasi) {
 }
 
 export const prasi = (globalThis as any).prasi as unknown as {
-  dir: { root: string };
   static_cache: any;
   static: StaticFile,
   server?: PrasiServer;

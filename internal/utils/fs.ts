@@ -1,8 +1,6 @@
 import { mkdirSync, statSync } from "fs";
 import { copyAsync } from "fs-jetpack";
-import { prasi } from "../prasi-var";
 import { dirname, join } from "path";
-import type { SiteConfig } from "./config";
 const internal = Symbol("internal");
 
 export const fs = {
@@ -76,14 +74,16 @@ export const fs = {
       createPath: true,
     });
   },
-  init(config: SiteConfig) {
-    this[internal].prefix.site = config.dir.site;
-    this[internal].prefix.upload = config.dir.upload;
+  init(paths: { site: string; upload: string; public: string }) {
+    this[internal].prefix.site = paths.site;
+    this[internal].prefix.upload = paths.upload;
+    this[internal].prefix.public = paths.public;
     this[internal].prefix.internal = join(process.cwd(), "internal");
   },
   [internal]: {
     prefix: {
       site: "",
+      public: "",
       upload: "",
       internal: "",
     },

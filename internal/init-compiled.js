@@ -1877,25 +1877,25 @@ var require_brace_expansion = __commonJS((exports2, module2) => {
         var pad = n.some(isPadded);
         N = [];
         for (var i = x;test(i, y); i += incr) {
-          var c;
+          var c2;
           if (isAlphaSequence) {
-            c = String.fromCharCode(i);
-            if (c === "\\")
-              c = "";
+            c2 = String.fromCharCode(i);
+            if (c2 === "\\")
+              c2 = "";
           } else {
-            c = String(i);
+            c2 = String(i);
             if (pad) {
-              var need = width - c.length;
+              var need = width - c2.length;
               if (need > 0) {
                 var z = new Array(need + 1).join("0");
                 if (i < 0)
-                  c = "-" + z + c.slice(1);
+                  c2 = "-" + z + c2.slice(1);
                 else
-                  c = z + c;
+                  c2 = z + c2;
               }
             }
           }
-          N.push(c);
+          N.push(c2);
         }
       } else {
         N = [];
@@ -1941,8 +1941,8 @@ var require_minimatch = __commonJS((exports2, module2) => {
   var star = qmark + "*?";
   var twoStarDot = "(?:(?!(?:\\/|^)(?:\\.{1,2})($|\\/)).)*?";
   var twoStarNoDot = "(?:(?!(?:\\/|^)\\.).)*?";
-  var charSet = (s) => s.split("").reduce((set, c) => {
-    set[c] = true;
+  var charSet = (s) => s.split("").reduce((set, c2) => {
+    set[c2] = true;
     return set;
   }, {});
   var reSpecials = charSet("().*{}+?[]^$\\!");
@@ -2181,26 +2181,26 @@ globstar while`, file, fr, pattern, pr, swallowee);
           stateChar = false;
         }
       };
-      for (let i = 0, c;i < pattern.length && (c = pattern.charAt(i)); i++) {
-        this.debug("%s\t%s %s %j", pattern, i, re, c);
+      for (let i = 0, c2;i < pattern.length && (c2 = pattern.charAt(i)); i++) {
+        this.debug("%s\t%s %s %j", pattern, i, re, c2);
         if (escaping) {
-          if (c === "/") {
+          if (c2 === "/") {
             return false;
           }
-          if (reSpecials[c]) {
+          if (reSpecials[c2]) {
             re += "\\";
           }
-          re += c;
+          re += c2;
           escaping = false;
           continue;
         }
-        switch (c) {
+        switch (c2) {
           case "/": {
             return false;
           }
           case "\\":
             if (inClass && pattern.charAt(i + 1) === "-") {
-              re += c;
+              re += c2;
               continue;
             }
             clearStateChar();
@@ -2211,17 +2211,17 @@ globstar while`, file, fr, pattern, pr, swallowee);
           case "+":
           case "@":
           case "!":
-            this.debug("%s\t%s %s %j <-- stateChar", pattern, i, re, c);
+            this.debug("%s\t%s %s %j <-- stateChar", pattern, i, re, c2);
             if (inClass) {
               this.debug("  in class");
-              if (c === "!" && i === classStart + 1)
-                c = "^";
-              re += c;
+              if (c2 === "!" && i === classStart + 1)
+                c2 = "^";
+              re += c2;
               continue;
             }
             this.debug("call clearStateChar %j", stateChar);
             clearStateChar();
-            stateChar = c;
+            stateChar = c2;
             if (options.noext)
               clearStateChar();
             continue;
@@ -2285,23 +2285,23 @@ globstar while`, file, fr, pattern, pr, swallowee);
           case "[":
             clearStateChar();
             if (inClass) {
-              re += "\\" + c;
+              re += "\\" + c2;
               continue;
             }
             inClass = true;
             classStart = i;
             reClassStart = re.length;
-            re += c;
+            re += c2;
             continue;
           case "]":
             if (i === classStart + 1 || !inClass) {
-              re += "\\" + c;
+              re += "\\" + c2;
               continue;
             }
             cs = pattern.substring(classStart + 1, i);
             try {
               RegExp("[" + braExpEscape(charUnescape(cs)) + "]");
-              re += c;
+              re += c2;
             } catch (er) {
               re = re.substring(0, reClassStart) + "(?:$.)";
             }
@@ -2310,10 +2310,10 @@ globstar while`, file, fr, pattern, pr, swallowee);
             continue;
           default:
             clearStateChar();
-            if (reSpecials[c] && !(c === "^" && inClass)) {
+            if (reSpecials[c2] && !(c2 === "^" && inClass)) {
               re += "\\";
             }
-            re += c;
+            re += c2;
             break;
         }
       }
@@ -3709,65 +3709,32 @@ __export(exports_init, {
   init: () => init2
 });
 module.exports = __toCommonJS(exports_init);
-var import_path2 = require("path");
 
-// internal/main/prasi-var.ts
-if (!globalThis.prasi) {
-  globalThis.prasi = {};
-}
-var prasi = globalThis.prasi;
-
-// internal/main/handler/http-handler.ts
-var createHttpHandler = (server, mode) => {
-  const handle = async function(req, opt) {
-    let body = null;
-    let headers = undefined;
-    const url = this.url;
-    const static_file = prasi.static.exists(url.pathname);
-    if (static_file) {
-      body = Bun.file(static_file.data.fullpath);
-    } else {
-    }
-    if (opt?.rewrite) {
-      body = opt.rewrite({ body, headers });
-    }
-    if (body === null) {
-      return new Response("Page Not Found", { status: 404 });
-    }
-    return new Response(body, { headers });
-  };
-  const index = {
-    head: [],
-    body: [],
-    render: () => ""
-  };
-  const handler = async (req) => {
-    const server2 = prasi.server;
-    if (server2 && typeof server2.http === "function") {
-      const url = new URL(req.url);
-      if (mode === "dev") {
-        const parts = url.pathname.split("/");
-        url.pathname = "/" + parts.slice(3).join("/");
-      }
-      return await server2.http({
-        handle: handle.bind({ url }),
-        index,
-        mode,
-        prasi: { page_id: "", params: {} },
-        req,
-        server: server2,
-        url: { pathname: url.pathname, raw: url }
-      });
-    }
-    return new Response("Page Not Found", { status: 404 });
-  };
-  return handler;
-};
-
-// internal/main/handler/ws-handler.ts
-var createWsHandler = () => {
-  return { message(ws, message) {
-  } };
+// internal/utils/color.ts
+var c = {
+  esc: "\x1B[0m",
+  black: "\x1B[30m",
+  red: "\x1B[31m",
+  green: "\x1B[32m",
+  yellow: "\x1B[33m",
+  blue: "\x1B[34m",
+  magenta: "\x1B[35m",
+  cyan: "\x1B[36m",
+  white: "\x1B[37m",
+  blackbg: "\x1B[40m",
+  redbg: "\x1B[41m",
+  greenbg: "\x1B[42m",
+  yellowbg: "\x1B[43m",
+  bluebg: "\x1B[44m",
+  magentabg: "\x1B[45m",
+  cyanbg: "\x1B[46m",
+  whitebg: "\x1B[47m",
+  bold: "\x1B[1m",
+  dim: "\x1B[2m",
+  italic: "\x1B[3m",
+  underline: "\x1B[4m",
+  rgb: (r, g, b) => `\x1B[38;2;${r};${g};${b}m`,
+  rgbbg: (r, g, b) => `\x1B[48;2;${r};${g};${b}m`
 };
 
 // internal/utils/static.ts
@@ -4504,6 +4471,12 @@ class BunSqliteKeyValue {
 
 // internal/utils/static.ts
 var import_fs_jetpack = __toESM(require_main());
+
+// internal/main/prasi-var.ts
+if (!globalThis.prasi) {
+  globalThis.prasi = {};
+}
+var prasi = globalThis.prasi;
 
 // node_modules/mime/dist/types/other.js
 var types = {
@@ -5850,15 +5823,15 @@ var waitUntil = (condition, arg) => {
         return;
       }
       let count = 0;
-      const c = setInterval(async () => {
+      const c2 = setInterval(async () => {
         if (await condition()) {
           if (tout)
             clearTimeout(tout);
-          clearInterval(c);
+          clearInterval(c2);
           resolve2();
         }
         if (count > 100) {
-          clearInterval(c);
+          clearInterval(c2);
         }
       }, arg?.interval || 10);
     } else if (typeof condition === "number") {
@@ -5990,17 +5963,70 @@ var cachedResponse = (ctx, file_path, mime, store) => {
   return { content, headers };
 };
 
+// internal/main/handler/http-handler.ts
+var createHttpHandler = (server, mode) => {
+  const handle = async function(req, opt) {
+    let body = null;
+    let headers = undefined;
+    const url = this.url;
+    const static_file = prasi.static.exists(url.pathname);
+    if (static_file) {
+      body = Bun.file(static_file.data.fullpath);
+    } else {
+    }
+    if (opt?.rewrite) {
+      body = opt.rewrite({ body, headers });
+    }
+    if (body === null) {
+      return new Response("Page Not Found", { status: 404 });
+    }
+    return new Response(body, { headers });
+  };
+  const index = {
+    head: [],
+    body: [],
+    render: () => ""
+  };
+  const handler = async (req) => {
+    const server2 = prasi.server;
+    if (server2 && typeof server2.http === "function") {
+      const url = new URL(req.url);
+      if (mode === "dev") {
+        const parts = url.pathname.split("/");
+        url.pathname = "/" + parts.slice(3).join("/");
+      }
+      return await server2.http({
+        handle: handle.bind({ url }),
+        index,
+        mode,
+        prasi: { page_id: "", params: {} },
+        req,
+        server: server2,
+        url: { pathname: url.pathname, raw: url }
+      });
+    }
+    return new Response("Page Not Found", { status: 404 });
+  };
+  return handler;
+};
+
+// internal/main/handler/ws-handler.ts
+var createWsHandler = () => {
+  return { message(ws, message) {
+  } };
+};
+
 // internal/main/init.ts
+var import_path2 = require("path");
 var init2 = async ({
-  root_dir,
+  site_id,
   server,
   mode,
   prasi: init_prasi
 }) => {
-  prasi.dir = { root: root_dir };
-  const script_path = `${root_dir}/${init_prasi.backend.index.replace(".ts", ".js")}`;
-  const base_dir = import_path2.dirname(import_path2.join(root_dir, init_prasi.frontend.index));
-  prasi.static = await staticFile(base_dir);
+  const script_dir = init_prasi.paths.dir.script;
+  const script_path = import_path2.join(script_dir, "index.js");
+  prasi.static = await staticFile(script_dir);
   delete require.cache[script_path];
   const module2 = require(script_path);
   prasi.server = module2.server;
@@ -6014,6 +6040,8 @@ var init2 = async ({
     };
   }
   const server_instance = server(prasi.server);
+  console.log(JSON.stringify(init_prasi, null, 2), script_dir);
+  console.log(`${c.magenta}[SITE]${c.esc} ${site_id} Backend Started.`);
   if (prasi.server?.init) {
     await prasi.server.init({ port: server_instance.port });
   }

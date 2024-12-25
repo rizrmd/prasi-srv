@@ -1,43 +1,43 @@
 import type { Server } from "bun";
-import { dirname, join } from "path";
 import type { PrasiServer } from "typings/server";
+import { c } from "utils/color";
+import { staticFile } from "utils/static";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi } from "./prasi-var";
-import { staticFile } from "utils/static";
-
+import { join } from "path";
 export const init = async ({
-  script_dir,
+  site_id,
   server,
   mode,
   prasi: init_prasi,
 }: {
-  script_dir: string;
+  site_id: string;
   prasi: {
-    frontend: { index: string; internal: string; typings: string };
-    backend: { index: string };
-    log_path: {
-      frontend: string;
-      backend: string;
+    version: number;
+    paths: {
+      index: string;
+      internal: string;
+      server: string;
       typings: string;
-      tailwind: string;
+      dir: {
+        script: string;
+        upload: string;
+        public: string;
+      };
     };
   };
   server: (server: PrasiServer) => Server;
   mode: "vm" | "server";
 }) => {
-  prasi.dir = { root: script_dir };
+  const script_dir = init_prasi.paths.dir.script;
+  const script_path = join(script_dir, "index.js");
 
-  const script_path = `${script_dir}/${init_prasi.backend.index.replace(
-    ".ts",
-    ".js"
-  )}`;
-
-  const base_dir = dirname(join(script_dir, init_prasi.frontend.index));
-  prasi.static = await staticFile(base_dir);
+  prasi.static = await staticFile(script_dir);
 
   delete require.cache[script_path];
   const module = require(script_path);
+
   prasi.server = module.server;
 
   if (!prasi.server) {
@@ -51,6 +51,9 @@ export const init = async ({
   }
 
   const server_instance = server(prasi.server);
+  console.log(JSON.stringify(init_prasi, null, 2), script_dir);
+
+  console.log(`${c.magenta}[SITE]${c.esc} ${site_id} Backend Started.`);
 
   if (prasi.server?.init) {
     await prasi.server.init({ port: server_instance.port });
