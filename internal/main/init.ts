@@ -5,13 +5,14 @@ import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi } from "./prasi-var";
 import { staticFile } from "utils/static";
+
 export const init = async ({
-  root_dir,
+  script_dir,
   server,
   mode,
   prasi: init_prasi,
 }: {
-  root_dir: string;
+  script_dir: string;
   prasi: {
     frontend: { index: string; internal: string; typings: string };
     backend: { index: string };
@@ -25,14 +26,14 @@ export const init = async ({
   server: (server: PrasiServer) => Server;
   mode: "vm" | "server";
 }) => {
-  prasi.dir = { root: root_dir };
+  prasi.dir = { root: script_dir };
 
-  const script_path = `${root_dir}/${init_prasi.backend.index.replace(
+  const script_path = `${script_dir}/${init_prasi.backend.index.replace(
     ".ts",
     ".js"
   )}`;
 
-  const base_dir = dirname(join(root_dir, init_prasi.frontend.index));
+  const base_dir = dirname(join(script_dir, init_prasi.frontend.index));
   prasi.static = await staticFile(base_dir);
 
   delete require.cache[script_path];
