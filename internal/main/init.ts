@@ -6,6 +6,8 @@ import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi } from "./prasi-var";
 import { join } from "path";
+import { fs } from "utils/fs";
+import { config, initConfig } from "utils/config";
 export const init = async ({
   site_id,
   server,
@@ -21,6 +23,7 @@ export const init = async ({
       server: string;
       typings: string;
       dir: {
+        site: string;
         script: string;
         upload: string;
         public: string;
@@ -32,6 +35,13 @@ export const init = async ({
 }) => {
   const script_dir = init_prasi.paths.dir.script;
   const script_path = join(script_dir, "index.js");
+
+  fs.init({
+    site: init_prasi.paths.dir.site,
+    upload: init_prasi.paths.dir.upload,
+    public: init_prasi.paths.dir.public,
+  });
+  await initConfig();
 
   prasi.static = await staticFile(script_dir);
 

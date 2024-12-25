@@ -1,9 +1,7 @@
 import { readdirSync } from "fs";
 import get from "lodash.get";
 import set from "lodash.set";
-import { join } from "path";
 import { fs } from "./fs";
-import { prasi } from "main/prasi-var";
 
 export const initConfig = async () => {
   if (Object.keys(gconf.prasi_config).length === 0) {
@@ -11,22 +9,23 @@ export const initConfig = async () => {
   }
   const config = gconf.prasi_config as typeof default_config;
 
-  // const path = join(prasi.dir.root, "site", "site.json");
-  // if (!fs.exists(path)) {
-  //   await fs.write(path, default_config);
-  // }
+  const path = fs.path("site:site.json");
+  if (!fs.exists(path)) {
+    await fs.write(path, default_config);
+  }
 
-  // const result = await fs.read(path, "json");
-  // if (!config.current) {
-  //   config.current = result as SiteConfig;
-  // }
+  const result = await fs.read(path, "json");
+  if (!config.current) {
+    config.current = result as SiteConfig;
+  }
+  config.config_path = path;
 
-  // const deploys = readdirSync(fs.path(`site:deploy/history`));
-  // config.current.deploy.history = deploys
-  //   .filter((e) => e.endsWith(".gz"))
-  //   .map((e) => parseInt(e.replace(".gz", "")));
+  const deploys = readdirSync(fs.path(`site:deploy/history`));
+  config.current.deploy.history = deploys
+    .filter((e) => e.endsWith(".gz"))
+    .map((e) => parseInt(e.replace(".gz", "")));
 
-  // return result as typeof default_config;
+  return result as typeof default_config;
 };
 
 const gconf = global as unknown as { prasi_config: typeof default_config };
@@ -42,9 +41,9 @@ const default_config = {
   },
   async set(path: string, value: any) {
     set(this.current as any, path, value);
-    await fs.write(this.file_path, this.current);
+    await fs.write(this.config_path, this.current);
   },
-  file_path: "",
+  config_path: "",
   current: {
     site_id: "",
     port: 0,
