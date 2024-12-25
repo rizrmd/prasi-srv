@@ -1,13 +1,13 @@
 import type { Server } from "bun";
+import { join } from "path";
 import type { PrasiServer } from "typings/server";
 import { c } from "utils/color";
+import { initConfig } from "utils/config";
+import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi } from "./prasi-var";
-import { join } from "path";
-import { fs } from "utils/fs";
-import { config, initConfig } from "utils/config";
 export const init = async ({
   site_id,
   server,
