@@ -8630,11 +8630,13 @@ var createWsHandler = () => {
 };
 
 // internal/main/init.ts
+var import_node_vm = require("vm");
 var init2 = async ({
   site_id,
   server,
   mode,
-  prasi: init_prasi
+  prasi: init_prasi,
+  action
 }) => {
   const script_dir = init_prasi.paths.dir.build;
   if (!script_dir) {
@@ -8653,9 +8655,18 @@ var init2 = async ({
   const { api_route: api_route2 } = await Promise.resolve().then(() => (init_api_route(), exports_api_route));
   await api_route2.init();
   prasi.static = await staticFile(script_dir);
-  delete require.cache[script_path];
-  const module2 = require(script_path);
-  prasi.server = module2.server;
+  if (mode === "vm") {
+    const src = await Bun.file(script_path).text();
+    const script = new import_node_vm.Script(src, { filename: script_path });
+    const ctx = { module: { exports: { server: null } } };
+    const cjs = script.runInThisContext();
+    cjs(ctx.module.exports, require, ctx.module);
+    prasi.server = ctx.module.exports.server;
+  } else {
+    delete require.cache[script_path];
+    const module2 = require(script_path);
+    prasi.server = module2.server;
+  }
   process.chdir(import_path4.join(init_prasi.paths.dir.build, import_path4.dirname(init_prasi.paths.server)));
   if (!prasi.server) {
     prasi.server = {
@@ -8667,7 +8678,7 @@ var init2 = async ({
     };
   }
   const server_instance = server(prasi.server);
-  console.log(`${c.magenta}[SITE]${c.esc} ${site_id} Backend Started.`);
+  console.log(`${c.magenta}[SITE]${c.esc} ${site_id} ${action === "reload" ? "Reloaded" : "Started"}.`);
   if (prasi.server?.init) {
     await prasi.server.init({ port: server_instance.port });
   }
