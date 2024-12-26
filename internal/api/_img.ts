@@ -1,10 +1,9 @@
 import { dirAsync } from "fs-jetpack";
-import { apiContext } from "utils/api-context";
 import { stat } from "fs/promises";
-import { dir } from "utils/dir";
-import { prasi } from "../prasi-var";
 import { dirname, parse } from "path";
 import sharp from "sharp";
+import { apiContext } from "utils/api-context";
+import { fs } from "utils/fs";
 
 const modified = {} as Record<string, number>;
 
@@ -27,7 +26,7 @@ export const _ = {
       .join("/");
 
     try {
-      const filepath = dir(`${prasi.datadir}/files/${rpath}`);
+      const filepath = fs.path(`upload:files/${rpath}`);
       const st = await stat(filepath);
       if (st.isFile()) {
         if (
@@ -52,8 +51,8 @@ export const _ = {
           let path = `${w ? `w-${w}` : ""}${h ? `h-${h}` : ``}${
             fit ? `-${fit}` : ""
           }`;
-          let file_name = dir(
-            `${prasi.datadir}/files/upload/thumb/${path}/${rpath}.webp`
+          let file_name = fs.path(
+            `upload:files/upload/thumb/${path}/${rpath}.webp`
           );
           let file = Bun.file(file_name);
           if (!(await file.exists())) {

@@ -1,9 +1,3 @@
-import mime from "mime";
-import { apiContext } from "utils/api-context";
-import { dir } from "utils/dir";
-import { prasi } from "../prasi-var";
-import { readdir, stat } from "fs/promises";
-import { basename, dirname } from "path";
 import {
   dirAsync,
   existsAsync,
@@ -11,6 +5,11 @@ import {
   removeAsync,
   renameAsync,
 } from "fs-jetpack";
+import { readdir, stat } from "fs/promises";
+import mime from "mime";
+import { basename, dirname } from "path";
+import { apiContext } from "utils/api-context";
+import { fs } from "utils/fs";
 
 export const _ = {
   url: "/_file/**",
@@ -26,8 +25,8 @@ export const _ = {
     let res = new Response("NOT FOUND", { status: 404 });
 
     if (Object.keys(req.query_parameters).length > 0) {
-      await dirAsync(dir(`${prasi.datadir}/files`));
-      const base_dir = dir(`${prasi.datadir}/files/${rpath}`);
+      await dirAsync(fs.path(`upload:files`));
+      const base_dir = fs.path(`upload:files/${rpath}`);
       if (typeof req.query_parameters["move"] === "string") {
         if (rpath) {
           let moveto = req.query_parameters["move"];
@@ -39,8 +38,8 @@ export const _ = {
             .join("/");
 
           await moveAsync(
-            dir(`${prasi.datadir}/files/${rpath}`),
-            dir(`${prasi.datadir}/files/${moveto}/${basename(rpath)}`)
+            fs.path(`uploadfiles/${rpath}`),
+            fs.path(`uploadfiles/${moveto}/${basename(rpath)}`)
           );
         }
 
@@ -49,7 +48,7 @@ export const _ = {
         });
       } else if (typeof req.query_parameters["del"] === "string") {
         if (rpath) {
-          const base_dir = dir(`${prasi.datadir}/files/${rpath}`);
+          const base_dir = fs.path(`uploadfiles/${rpath}`);
           if (await existsAsync(base_dir)) {
             const s = await stat(base_dir);
             if (s.isDirectory()) {
@@ -76,12 +75,10 @@ export const _ = {
 
         let newname = "";
         if (rpath) {
-          if (await existsAsync(dir(`${prasi.datadir}/files/${rpath}`))) {
-            await renameAsync(dir(`${prasi.datadir}/files/${rpath}`), rename);
+          if (await existsAsync(fs.path(`uploadfiles/${rpath}`))) {
+            await renameAsync(fs.path(`uploadfiles/${rpath}`), rename);
           } else {
-            const target = dir(
-              `${prasi.datadir}/files/${dirname(rpath)}/${rename}`
-            );
+            const target = fs.path(`upload:files/${dirname(rpath)}/${rename}`);
             await dirAsync(target);
           }
           newname = `/${dirname(rpath)}/${rename}`;
@@ -101,7 +98,7 @@ export const _ = {
             (
               await readdir(base_dir)
             ).map(async (e) => {
-              const s = await stat(dir(`${prasi.datadir}/files/${rpath}/${e}`));
+              const s = await stat(fs.path(`uploadfiles/${rpath}/${e}`));
               files.push({
                 name: e,
                 type: s.isDirectory() ? "dir" : "file",
@@ -120,7 +117,7 @@ export const _ = {
       }
     }
 
-    const path = dir(`${prasi.datadir}/files/${rpath}`);
+    const path = fs.path(`uploadfiles/${rpath}`);
     const file = Bun.file(path);
 
     if (await file.exists()) {

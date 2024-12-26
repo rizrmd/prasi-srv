@@ -80,6 +80,8 @@ export const init = async ({
     join(init_prasi.paths.dir.build, dirname(init_prasi.paths.server))
   );
 
+  prasi.ext = {};
+
   if (!prasi.server) {
     prasi.server = {
       async http(arg) {
