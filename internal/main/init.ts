@@ -68,7 +68,7 @@ export const init = async ({
   process.chdir(
     join(init_prasi.paths.dir.build, dirname(init_prasi.paths.server))
   );
-
+ 
   if (!prasi.server) {
     prasi.server = {
       async http(arg) {
@@ -80,7 +80,6 @@ export const init = async ({
   }
 
   const server_instance = server(prasi.server);
-
   console.log(`${c.magenta}[SITE]${c.esc} ${site_id} Backend Started.`);
 
   if (prasi.server?.init) {
