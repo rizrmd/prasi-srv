@@ -72,6 +72,631 @@ var init_color = __esm(() => {
   };
 });
 
+// node_modules/lodash.get/index.js
+var require_lodash = __commonJS((exports2, module2) => {
+  var FUNC_ERROR_TEXT = "Expected a function";
+  var HASH_UNDEFINED = "__lodash_hash_undefined__";
+  var INFINITY = 1 / 0;
+  var funcTag = "[object Function]";
+  var genTag = "[object GeneratorFunction]";
+  var symbolTag = "[object Symbol]";
+  var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
+  var reIsPlainProp = /^\w*$/;
+  var reLeadingDot = /^\./;
+  var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+  var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+  var reEscapeChar = /\\(\\)?/g;
+  var reIsHostCtor = /^\[object .+?Constructor\]$/;
+  var freeGlobal = typeof global == "object" && global && global.Object === Object && global;
+  var freeSelf = typeof self == "object" && self && self.Object === Object && self;
+  var root = freeGlobal || freeSelf || Function("return this")();
+  function getValue(object, key) {
+    return object == null ? undefined : object[key];
+  }
+  function isHostObject(value) {
+    var result = false;
+    if (value != null && typeof value.toString != "function") {
+      try {
+        result = !!(value + "");
+      } catch (e) {
+      }
+    }
+    return result;
+  }
+  var arrayProto = Array.prototype;
+  var funcProto = Function.prototype;
+  var objectProto = Object.prototype;
+  var coreJsData = root["__core-js_shared__"];
+  var maskSrcKey = function() {
+    var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || "");
+    return uid ? "Symbol(src)_1." + uid : "";
+  }();
+  var funcToString = funcProto.toString;
+  var hasOwnProperty = objectProto.hasOwnProperty;
+  var objectToString = objectProto.toString;
+  var reIsNative = RegExp("^" + funcToString.call(hasOwnProperty).replace(reRegExpChar, "\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") + "$");
+  var Symbol2 = root.Symbol;
+  var splice = arrayProto.splice;
+  var Map2 = getNative(root, "Map");
+  var nativeCreate = getNative(Object, "create");
+  var symbolProto = Symbol2 ? Symbol2.prototype : undefined;
+  var symbolToString = symbolProto ? symbolProto.toString : undefined;
+  function Hash(entries) {
+    var index = -1, length = entries ? entries.length : 0;
+    this.clear();
+    while (++index < length) {
+      var entry = entries[index];
+      this.set(entry[0], entry[1]);
+    }
+  }
+  function hashClear() {
+    this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  }
+  function hashDelete(key) {
+    return this.has(key) && delete this.__data__[key];
+  }
+  function hashGet(key) {
+    var data = this.__data__;
+    if (nativeCreate) {
+      var result = data[key];
+      return result === HASH_UNDEFINED ? undefined : result;
+    }
+    return hasOwnProperty.call(data, key) ? data[key] : undefined;
+  }
+  function hashHas(key) {
+    var data = this.__data__;
+    return nativeCreate ? data[key] !== undefined : hasOwnProperty.call(data, key);
+  }
+  function hashSet(key, value) {
+    var data = this.__data__;
+    data[key] = nativeCreate && value === undefined ? HASH_UNDEFINED : value;
+    return this;
+  }
+  Hash.prototype.clear = hashClear;
+  Hash.prototype["delete"] = hashDelete;
+  Hash.prototype.get = hashGet;
+  Hash.prototype.has = hashHas;
+  Hash.prototype.set = hashSet;
+  function ListCache(entries) {
+    var index = -1, length = entries ? entries.length : 0;
+    this.clear();
+    while (++index < length) {
+      var entry = entries[index];
+      this.set(entry[0], entry[1]);
+    }
+  }
+  function listCacheClear() {
+    this.__data__ = [];
+  }
+  function listCacheDelete(key) {
+    var data = this.__data__, index = assocIndexOf(data, key);
+    if (index < 0) {
+      return false;
+    }
+    var lastIndex = data.length - 1;
+    if (index == lastIndex) {
+      data.pop();
+    } else {
+      splice.call(data, index, 1);
+    }
+    return true;
+  }
+  function listCacheGet(key) {
+    var data = this.__data__, index = assocIndexOf(data, key);
+    return index < 0 ? undefined : data[index][1];
+  }
+  function listCacheHas(key) {
+    return assocIndexOf(this.__data__, key) > -1;
+  }
+  function listCacheSet(key, value) {
+    var data = this.__data__, index = assocIndexOf(data, key);
+    if (index < 0) {
+      data.push([key, value]);
+    } else {
+      data[index][1] = value;
+    }
+    return this;
+  }
+  ListCache.prototype.clear = listCacheClear;
+  ListCache.prototype["delete"] = listCacheDelete;
+  ListCache.prototype.get = listCacheGet;
+  ListCache.prototype.has = listCacheHas;
+  ListCache.prototype.set = listCacheSet;
+  function MapCache(entries) {
+    var index = -1, length = entries ? entries.length : 0;
+    this.clear();
+    while (++index < length) {
+      var entry = entries[index];
+      this.set(entry[0], entry[1]);
+    }
+  }
+  function mapCacheClear() {
+    this.__data__ = {
+      hash: new Hash,
+      map: new (Map2 || ListCache),
+      string: new Hash
+    };
+  }
+  function mapCacheDelete(key) {
+    return getMapData(this, key)["delete"](key);
+  }
+  function mapCacheGet(key) {
+    return getMapData(this, key).get(key);
+  }
+  function mapCacheHas(key) {
+    return getMapData(this, key).has(key);
+  }
+  function mapCacheSet(key, value) {
+    getMapData(this, key).set(key, value);
+    return this;
+  }
+  MapCache.prototype.clear = mapCacheClear;
+  MapCache.prototype["delete"] = mapCacheDelete;
+  MapCache.prototype.get = mapCacheGet;
+  MapCache.prototype.has = mapCacheHas;
+  MapCache.prototype.set = mapCacheSet;
+  function assocIndexOf(array, key) {
+    var length = array.length;
+    while (length--) {
+      if (eq(array[length][0], key)) {
+        return length;
+      }
+    }
+    return -1;
+  }
+  function baseGet(object, path) {
+    path = isKey(path, object) ? [path] : castPath(path);
+    var index = 0, length = path.length;
+    while (object != null && index < length) {
+      object = object[toKey(path[index++])];
+    }
+    return index && index == length ? object : undefined;
+  }
+  function baseIsNative(value) {
+    if (!isObject(value) || isMasked(value)) {
+      return false;
+    }
+    var pattern = isFunction(value) || isHostObject(value) ? reIsNative : reIsHostCtor;
+    return pattern.test(toSource(value));
+  }
+  function baseToString(value) {
+    if (typeof value == "string") {
+      return value;
+    }
+    if (isSymbol(value)) {
+      return symbolToString ? symbolToString.call(value) : "";
+    }
+    var result = value + "";
+    return result == "0" && 1 / value == -INFINITY ? "-0" : result;
+  }
+  function castPath(value) {
+    return isArray(value) ? value : stringToPath(value);
+  }
+  function getMapData(map, key) {
+    var data = map.__data__;
+    return isKeyable(key) ? data[typeof key == "string" ? "string" : "hash"] : data.map;
+  }
+  function getNative(object, key) {
+    var value = getValue(object, key);
+    return baseIsNative(value) ? value : undefined;
+  }
+  function isKey(value, object) {
+    if (isArray(value)) {
+      return false;
+    }
+    var type = typeof value;
+    if (type == "number" || type == "symbol" || type == "boolean" || value == null || isSymbol(value)) {
+      return true;
+    }
+    return reIsPlainProp.test(value) || !reIsDeepProp.test(value) || object != null && value in Object(object);
+  }
+  function isKeyable(value) {
+    var type = typeof value;
+    return type == "string" || type == "number" || type == "symbol" || type == "boolean" ? value !== "__proto__" : value === null;
+  }
+  function isMasked(func) {
+    return !!maskSrcKey && maskSrcKey in func;
+  }
+  var stringToPath = memoize(function(string) {
+    string = toString2(string);
+    var result = [];
+    if (reLeadingDot.test(string)) {
+      result.push("");
+    }
+    string.replace(rePropName, function(match, number, quote, string2) {
+      result.push(quote ? string2.replace(reEscapeChar, "$1") : number || match);
+    });
+    return result;
+  });
+  function toKey(value) {
+    if (typeof value == "string" || isSymbol(value)) {
+      return value;
+    }
+    var result = value + "";
+    return result == "0" && 1 / value == -INFINITY ? "-0" : result;
+  }
+  function toSource(func) {
+    if (func != null) {
+      try {
+        return funcToString.call(func);
+      } catch (e) {
+      }
+      try {
+        return func + "";
+      } catch (e) {
+      }
+    }
+    return "";
+  }
+  function memoize(func, resolver) {
+    if (typeof func != "function" || resolver && typeof resolver != "function") {
+      throw new TypeError(FUNC_ERROR_TEXT);
+    }
+    var memoized = function() {
+      var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache = memoized.cache;
+      if (cache.has(key)) {
+        return cache.get(key);
+      }
+      var result = func.apply(this, args);
+      memoized.cache = cache.set(key, result);
+      return result;
+    };
+    memoized.cache = new (memoize.Cache || MapCache);
+    return memoized;
+  }
+  memoize.Cache = MapCache;
+  function eq(value, other) {
+    return value === other || value !== value && other !== other;
+  }
+  var isArray = Array.isArray;
+  function isFunction(value) {
+    var tag = isObject(value) ? objectToString.call(value) : "";
+    return tag == funcTag || tag == genTag;
+  }
+  function isObject(value) {
+    var type = typeof value;
+    return !!value && (type == "object" || type == "function");
+  }
+  function isObjectLike(value) {
+    return !!value && typeof value == "object";
+  }
+  function isSymbol(value) {
+    return typeof value == "symbol" || isObjectLike(value) && objectToString.call(value) == symbolTag;
+  }
+  function toString2(value) {
+    return value == null ? "" : baseToString(value);
+  }
+  function get(object, path, defaultValue) {
+    var result = object == null ? undefined : baseGet(object, path);
+    return result === undefined ? defaultValue : result;
+  }
+  module2.exports = get;
+});
+
+// node_modules/lodash.set/index.js
+var require_lodash2 = __commonJS((exports2, module2) => {
+  var FUNC_ERROR_TEXT = "Expected a function";
+  var HASH_UNDEFINED = "__lodash_hash_undefined__";
+  var INFINITY = 1 / 0;
+  var MAX_SAFE_INTEGER = 9007199254740991;
+  var funcTag = "[object Function]";
+  var genTag = "[object GeneratorFunction]";
+  var symbolTag = "[object Symbol]";
+  var reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\\]|\\.)*?\1)\]/;
+  var reIsPlainProp = /^\w*$/;
+  var reLeadingDot = /^\./;
+  var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|$))/g;
+  var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+  var reEscapeChar = /\\(\\)?/g;
+  var reIsHostCtor = /^\[object .+?Constructor\]$/;
+  var reIsUint = /^(?:0|[1-9]\d*)$/;
+  var freeGlobal = typeof global == "object" && global && global.Object === Object && global;
+  var freeSelf = typeof self == "object" && self && self.Object === Object && self;
+  var root = freeGlobal || freeSelf || Function("return this")();
+  function getValue(object, key) {
+    return object == null ? undefined : object[key];
+  }
+  function isHostObject(value) {
+    var result = false;
+    if (value != null && typeof value.toString != "function") {
+      try {
+        result = !!(value + "");
+      } catch (e) {
+      }
+    }
+    return result;
+  }
+  var arrayProto = Array.prototype;
+  var funcProto = Function.prototype;
+  var objectProto = Object.prototype;
+  var coreJsData = root["__core-js_shared__"];
+  var maskSrcKey = function() {
+    var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || "");
+    return uid ? "Symbol(src)_1." + uid : "";
+  }();
+  var funcToString = funcProto.toString;
+  var hasOwnProperty = objectProto.hasOwnProperty;
+  var objectToString = objectProto.toString;
+  var reIsNative = RegExp("^" + funcToString.call(hasOwnProperty).replace(reRegExpChar, "\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, "$1.*?") + "$");
+  var Symbol2 = root.Symbol;
+  var splice = arrayProto.splice;
+  var Map2 = getNative(root, "Map");
+  var nativeCreate = getNative(Object, "create");
+  var symbolProto = Symbol2 ? Symbol2.prototype : undefined;
+  var symbolToString = symbolProto ? symbolProto.toString : undefined;
+  function Hash(entries) {
+    var index = -1, length = entries ? entries.length : 0;
+    this.clear();
+    while (++index < length) {
+      var entry = entries[index];
+      this.set(entry[0], entry[1]);
+    }
+  }
+  function hashClear() {
+    this.__data__ = nativeCreate ? nativeCreate(null) : {};
+  }
+  function hashDelete(key) {
+    return this.has(key) && delete this.__data__[key];
+  }
+  function hashGet(key) {
+    var data = this.__data__;
+    if (nativeCreate) {
+      var result = data[key];
+      return result === HASH_UNDEFINED ? undefined : result;
+    }
+    return hasOwnProperty.call(data, key) ? data[key] : undefined;
+  }
+  function hashHas(key) {
+    var data = this.__data__;
+    return nativeCreate ? data[key] !== undefined : hasOwnProperty.call(data, key);
+  }
+  function hashSet(key, value) {
+    var data = this.__data__;
+    data[key] = nativeCreate && value === undefined ? HASH_UNDEFINED : value;
+    return this;
+  }
+  Hash.prototype.clear = hashClear;
+  Hash.prototype["delete"] = hashDelete;
+  Hash.prototype.get = hashGet;
+  Hash.prototype.has = hashHas;
+  Hash.prototype.set = hashSet;
+  function ListCache(entries) {
+    var index = -1, length = entries ? entries.length : 0;
+    this.clear();
+    while (++index < length) {
+      var entry = entries[index];
+      this.set(entry[0], entry[1]);
+    }
+  }
+  function listCacheClear() {
+    this.__data__ = [];
+  }
+  function listCacheDelete(key) {
+    var data = this.__data__, index = assocIndexOf(data, key);
+    if (index < 0) {
+      return false;
+    }
+    var lastIndex = data.length - 1;
+    if (index == lastIndex) {
+      data.pop();
+    } else {
+      splice.call(data, index, 1);
+    }
+    return true;
+  }
+  function listCacheGet(key) {
+    var data = this.__data__, index = assocIndexOf(data, key);
+    return index < 0 ? undefined : data[index][1];
+  }
+  function listCacheHas(key) {
+    return assocIndexOf(this.__data__, key) > -1;
+  }
+  function listCacheSet(key, value) {
+    var data = this.__data__, index = assocIndexOf(data, key);
+    if (index < 0) {
+      data.push([key, value]);
+    } else {
+      data[index][1] = value;
+    }
+    return this;
+  }
+  ListCache.prototype.clear = listCacheClear;
+  ListCache.prototype["delete"] = listCacheDelete;
+  ListCache.prototype.get = listCacheGet;
+  ListCache.prototype.has = listCacheHas;
+  ListCache.prototype.set = listCacheSet;
+  function MapCache(entries) {
+    var index = -1, length = entries ? entries.length : 0;
+    this.clear();
+    while (++index < length) {
+      var entry = entries[index];
+      this.set(entry[0], entry[1]);
+    }
+  }
+  function mapCacheClear() {
+    this.__data__ = {
+      hash: new Hash,
+      map: new (Map2 || ListCache),
+      string: new Hash
+    };
+  }
+  function mapCacheDelete(key) {
+    return getMapData(this, key)["delete"](key);
+  }
+  function mapCacheGet(key) {
+    return getMapData(this, key).get(key);
+  }
+  function mapCacheHas(key) {
+    return getMapData(this, key).has(key);
+  }
+  function mapCacheSet(key, value) {
+    getMapData(this, key).set(key, value);
+    return this;
+  }
+  MapCache.prototype.clear = mapCacheClear;
+  MapCache.prototype["delete"] = mapCacheDelete;
+  MapCache.prototype.get = mapCacheGet;
+  MapCache.prototype.has = mapCacheHas;
+  MapCache.prototype.set = mapCacheSet;
+  function assignValue(object, key, value) {
+    var objValue = object[key];
+    if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) || value === undefined && !(key in object)) {
+      object[key] = value;
+    }
+  }
+  function assocIndexOf(array, key) {
+    var length = array.length;
+    while (length--) {
+      if (eq(array[length][0], key)) {
+        return length;
+      }
+    }
+    return -1;
+  }
+  function baseIsNative(value) {
+    if (!isObject(value) || isMasked(value)) {
+      return false;
+    }
+    var pattern = isFunction(value) || isHostObject(value) ? reIsNative : reIsHostCtor;
+    return pattern.test(toSource(value));
+  }
+  function baseSet(object, path, value, customizer) {
+    if (!isObject(object)) {
+      return object;
+    }
+    path = isKey(path, object) ? [path] : castPath(path);
+    var index = -1, length = path.length, lastIndex = length - 1, nested = object;
+    while (nested != null && ++index < length) {
+      var key = toKey(path[index]), newValue = value;
+      if (index != lastIndex) {
+        var objValue = nested[key];
+        newValue = customizer ? customizer(objValue, key, nested) : undefined;
+        if (newValue === undefined) {
+          newValue = isObject(objValue) ? objValue : isIndex(path[index + 1]) ? [] : {};
+        }
+      }
+      assignValue(nested, key, newValue);
+      nested = nested[key];
+    }
+    return object;
+  }
+  function baseToString(value) {
+    if (typeof value == "string") {
+      return value;
+    }
+    if (isSymbol(value)) {
+      return symbolToString ? symbolToString.call(value) : "";
+    }
+    var result = value + "";
+    return result == "0" && 1 / value == -INFINITY ? "-0" : result;
+  }
+  function castPath(value) {
+    return isArray(value) ? value : stringToPath(value);
+  }
+  function getMapData(map, key) {
+    var data = map.__data__;
+    return isKeyable(key) ? data[typeof key == "string" ? "string" : "hash"] : data.map;
+  }
+  function getNative(object, key) {
+    var value = getValue(object, key);
+    return baseIsNative(value) ? value : undefined;
+  }
+  function isIndex(value, length) {
+    length = length == null ? MAX_SAFE_INTEGER : length;
+    return !!length && (typeof value == "number" || reIsUint.test(value)) && (value > -1 && value % 1 == 0 && value < length);
+  }
+  function isKey(value, object) {
+    if (isArray(value)) {
+      return false;
+    }
+    var type = typeof value;
+    if (type == "number" || type == "symbol" || type == "boolean" || value == null || isSymbol(value)) {
+      return true;
+    }
+    return reIsPlainProp.test(value) || !reIsDeepProp.test(value) || object != null && value in Object(object);
+  }
+  function isKeyable(value) {
+    var type = typeof value;
+    return type == "string" || type == "number" || type == "symbol" || type == "boolean" ? value !== "__proto__" : value === null;
+  }
+  function isMasked(func) {
+    return !!maskSrcKey && maskSrcKey in func;
+  }
+  var stringToPath = memoize(function(string) {
+    string = toString2(string);
+    var result = [];
+    if (reLeadingDot.test(string)) {
+      result.push("");
+    }
+    string.replace(rePropName, function(match, number, quote, string2) {
+      result.push(quote ? string2.replace(reEscapeChar, "$1") : number || match);
+    });
+    return result;
+  });
+  function toKey(value) {
+    if (typeof value == "string" || isSymbol(value)) {
+      return value;
+    }
+    var result = value + "";
+    return result == "0" && 1 / value == -INFINITY ? "-0" : result;
+  }
+  function toSource(func) {
+    if (func != null) {
+      try {
+        return funcToString.call(func);
+      } catch (e) {
+      }
+      try {
+        return func + "";
+      } catch (e) {
+      }
+    }
+    return "";
+  }
+  function memoize(func, resolver) {
+    if (typeof func != "function" || resolver && typeof resolver != "function") {
+      throw new TypeError(FUNC_ERROR_TEXT);
+    }
+    var memoized = function() {
+      var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache = memoized.cache;
+      if (cache.has(key)) {
+        return cache.get(key);
+      }
+      var result = func.apply(this, args);
+      memoized.cache = cache.set(key, result);
+      return result;
+    };
+    memoized.cache = new (memoize.Cache || MapCache);
+    return memoized;
+  }
+  memoize.Cache = MapCache;
+  function eq(value, other) {
+    return value === other || value !== value && other !== other;
+  }
+  var isArray = Array.isArray;
+  function isFunction(value) {
+    var tag = isObject(value) ? objectToString.call(value) : "";
+    return tag == funcTag || tag == genTag;
+  }
+  function isObject(value) {
+    var type = typeof value;
+    return !!value && (type == "object" || type == "function");
+  }
+  function isObjectLike(value) {
+    return !!value && typeof value == "object";
+  }
+  function isSymbol(value) {
+    return typeof value == "symbol" || isObjectLike(value) && objectToString.call(value) == symbolTag;
+  }
+  function toString2(value) {
+    return value == null ? "" : baseToString(value);
+  }
+  function set(object, path, value) {
+    return object == null ? object : baseSet(object, path, value);
+  }
+  module2.exports = set;
+});
+
 // node_modules/fs-jetpack/lib/utils/promisify.js
 var require_promisify = __commonJS((exports2, module2) => {
   module2.exports = (fn) => {
@@ -4133,9 +4758,9 @@ var require_spack = __commonJS((exports2) => {
   exports2.config = exports2.compileBundleOptions = exports2.isLocalFile = undefined;
   var path = __importStar(require("path"));
   exports2.isLocalFile = /^\.{0,2}\//;
-  function compileBundleOptions(config2) {
+  function compileBundleOptions(config3) {
     return __awaiter(this, undefined, undefined, function* () {
-      const f = config2 === undefined ? "." : config2;
+      const f = config3 === undefined ? "." : config3;
       try {
         const filepath = typeof f === "string" ? f : "spack.config.js";
         const fileModule = exports2.isLocalFile.test(filepath) ? path.resolve(filepath) : filepath;
@@ -4152,20 +4777,20 @@ var require_spack = __commonJS((exports2) => {
           }
           return configFromFile;
         }
-        return Object.assign(Object.assign({}, configFromFile), typeof config2 === "string" ? {} : config2);
+        return Object.assign(Object.assign({}, configFromFile), typeof config3 === "string" ? {} : config3);
       } catch (e) {
         if (typeof f === "string") {
-          throw new Error(`Error occurred while loading config file at ${config2}: ${e}`);
+          throw new Error(`Error occurred while loading config file at ${config3}: ${e}`);
         }
         return f;
       }
     });
   }
   exports2.compileBundleOptions = compileBundleOptions;
-  function config(c2) {
+  function config2(c2) {
     return c2;
   }
-  exports2.config = config;
+  exports2.config = config2;
 });
 
 // node_modules/@swc/wasm/wasm.js
@@ -5595,6 +6220,11 @@ module.exports = __toCommonJS(exports_init);
 var import_path4 = require("path");
 init_color();
 
+// internal/utils/config.ts
+var import_fs2 = require("fs");
+var import_lodash = __toESM(require_lodash());
+var import_lodash2 = __toESM(require_lodash2());
+
 // internal/utils/fs.ts
 var import_fs = require("fs");
 var import_fs_jetpack = __toESM(require_main());
@@ -5668,6 +6298,54 @@ var fs = {
       public: "",
       upload: "",
       internal: ""
+    }
+  }
+};
+
+// internal/utils/config.ts
+var initConfig = async () => {
+  if (Object.keys(gconf.prasi_config).length === 0) {
+    gconf.prasi_config = { ...default_config };
+  }
+  const config = gconf.prasi_config;
+  const path = fs.path("site:site.json");
+  if (!fs.exists(path)) {
+    await fs.write(path, default_config);
+  }
+  const result = await fs.read(path, "json");
+  if (!config.current) {
+    config.current = result;
+  }
+  config.config_path = path;
+  const deploys = import_fs2.readdirSync(fs.path(`site:deploy/history`));
+  config.current.deploy.history = deploys.filter((e) => e.endsWith(".gz")).map((e) => parseInt(e.replace(".gz", "")));
+  return result;
+};
+var gconf = global;
+if (!gconf.prasi_config) {
+  gconf.prasi_config = {};
+}
+var config = gconf.prasi_config;
+var default_config = {
+  get(path) {
+    return import_lodash.default(this.current, path);
+  },
+  async set(path, value) {
+    import_lodash2.default(this.current, path, value);
+    await fs.write(this.config_path, this.current);
+  },
+  config_path: "",
+  current: {
+    site_id: "",
+    port: 0,
+    db: { orm: "prisma", url: "" },
+    deploy: {
+      current: 0,
+      history: []
+    },
+    dir: {
+      site: "",
+      upload: ""
     }
   }
 };
@@ -7952,24 +8630,25 @@ var createWsHandler = () => {
 };
 
 // internal/main/init.ts
-var __dirname = "/Users/riz/Developer/data/site-srv/main/internal/main", __filename = "/Users/riz/Developer/data/site-srv/main/internal/main/init.ts";
 var init2 = async ({
   site_id,
   server,
   mode,
-  vm_dir,
   prasi: init_prasi
 }) => {
-  const script_dir = init_prasi.paths.dir.script;
-  const script_path = import_path4.join(script_dir, "index.js");
+  const script_dir = init_prasi.paths.dir.build;
+  if (!script_dir) {
+    console.error(`dir.build is empty, please check prasi.json!`);
+    return;
+  }
+  const script_path = import_path4.join(script_dir, init_prasi.paths.server.replace(".ts", ".js"));
   fs.init({
     site: init_prasi.paths.dir.site,
     upload: init_prasi.paths.dir.upload,
     public: init_prasi.paths.dir.public
   });
-  if (vm_dir) {
-    process.chdir(vm_dir);
-    console.log(__filename, __dirname);
+  if (mode === "server") {
+    await initConfig();
   }
   const { api_route: api_route2 } = await Promise.resolve().then(() => (init_api_route(), exports_api_route));
   await api_route2.init();
@@ -7977,6 +8656,7 @@ var init2 = async ({
   delete require.cache[script_path];
   const module2 = require(script_path);
   prasi.server = module2.server;
+  process.chdir(import_path4.join(init_prasi.paths.dir.build, import_path4.dirname(init_prasi.paths.server)));
   if (!prasi.server) {
     prasi.server = {
       async http(arg) {

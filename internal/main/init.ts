@@ -1,7 +1,9 @@
 import type { Server } from "bun";
-import { join } from "path";
+import { dirname, join } from "path";
 import type { PrasiServer } from "typings/server";
 import { c } from "utils/color";
+// import { initConfig } from "utils/config";
+import { initConfig } from "utils/config";
 import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
 import { createHttpHandler } from "./handler/http-handler";
@@ -12,7 +14,6 @@ export const init = async ({
   site_id,
   server,
   mode,
-  vm_dir,
   prasi: init_prasi,
 }: {
   site_id: string;
@@ -25,31 +26,36 @@ export const init = async ({
       typings: string;
       dir: {
         site: string;
-        script: string;
+        build: string;
         upload: string;
         public: string;
       };
     };
   };
-  vm_dir?: string;
   server: (server: PrasiServer) => Server;
-  mode: "vm" | "server"; 
+  mode: "vm" | "server";
 }) => {
-  const script_dir = init_prasi.paths.dir.script;
-  const script_path = join(script_dir, "index.js");
+  const script_dir = init_prasi.paths.dir.build;
+
+  if (!script_dir) {
+    console.error(`dir.build is empty, please check prasi.json!`);
+    return;
+  }
+
+  const script_path = join(
+    script_dir,
+    init_prasi.paths.server.replace(".ts", ".js")
+  );
 
   fs.init({
     site: init_prasi.paths.dir.site,
     upload: init_prasi.paths.dir.upload,
     public: init_prasi.paths.dir.public,
   });
-  // await initConfig(); 
-
-  if (vm_dir) {
-    process.chdir(vm_dir);
-    console.log(__filename, __dirname);
+  if (mode === "server") {
+    await initConfig();
   }
-  
+
   const { api_route } = await import("./handler/api-route");
   await api_route.init();
 
@@ -57,8 +63,11 @@ export const init = async ({
 
   delete require.cache[script_path];
   const module = require(script_path);
-
   prasi.server = module.server;
+
+  process.chdir(
+    join(init_prasi.paths.dir.build, dirname(init_prasi.paths.server))
+  );
 
   if (!prasi.server) {
     prasi.server = {
