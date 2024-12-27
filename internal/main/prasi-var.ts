@@ -14,6 +14,7 @@ if (!(globalThis as any).prasi) {
 export const prasi = (globalThis as any).prasi as unknown as {
   static_cache: any;
   static: StaticFile;
+  mode: "vm" | "server"
   ext: {
     kv?: BunSqliteKeyValue;
     firebase?: {

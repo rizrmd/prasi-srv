@@ -1,7 +1,7 @@
 import { $ } from "bun";
 import { readdirSync } from "fs";
 import { readAsync, removeAsync, writeAsync } from "fs-jetpack";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { config as _config, type SiteConfig } from "utils/config";
 import { fs } from "utils/fs";
 import { genEnv, parseEnv } from "utils/parse-env";
@@ -26,166 +26,166 @@ export const _ = {
     ) & {
       id_site: string;
     }
-  ) {
-    const { res, req } = apiContext(this);
-    const deploy = _config.current?.deploy!;
-    const config = _config.current!;
+  ): ApiResponse {
+    const { req } = apiContext(this);
+    // const deploy = _config.current?.deploy!;
+    // const config = _config.current!;
 
-    if (typeof req.query_parameters["export"] !== "undefined") {
-      return new Response(
-        Bun.file(fs.path(`site:deploy/current/${deploy.current}.gz`))
-      );
-    }
+    // if (typeof req.query_parameters["export"] !== "undefined") {
+    //   return new Response(
+    //     Bun.file(fs.path(`site:deploy/current/${deploy.current}.gz`))
+    //   );
+    // }
 
-    switch (action.type) {
-      case "check":
-        const deploys = readdirSync(fs.path("site:deploy/history"));
+    // switch (action.type) {
+    //   case "check":
+    //     const deploys = readdirSync(fs.path("site:deploy/history"));
 
-        return {
-          now: Date.now(),
-          current: deploy.current,
-          deploys: deploys
-            .filter((e) => e.endsWith(".gz"))
-            .map((e) => parseInt(e.replace(".gz", ""))),
-          db: {
-            url: config.db.url,
-            orm: config.db.orm,
-          },
-        };
-      case "db-ver": {
-        return (await fs.read(`site:app/db/version`, "string")) || "";
-      }
-      case "db-sync": {
-        const res = await fetch(action.url);
-        const text = await res.text();
-        if (text) {
-          await Bun.write(fs.path("site:app/db/prisma/schema.prisma"), text);
-          await Bun.write(
-            fs.path(`site:app/db/version`),
-            Date.now().toString()
-          );
-        }
-        return "ok";
-      }
-      case "db-update":
-        if (action.url) {
-          config.db.url = action.url;
-          config.db.orm = action.orm;
-          const env = genEnv({
-            ...parseEnv(await Bun.file(fs.path("site:app/db/.env")).text()),
-            DATABASE_URL: action.url,
-          });
-          await Bun.write(fs.path("site:app/db/.env"), env);
-        }
-        return "ok";
-      case "db-gen":
-        {
-          await $`bun prisma generate`.cwd(fs.path("site:app/db"));
+    //     return {
+    //       now: Date.now(),
+    //       current: deploy.current,
+    //       deploys: deploys
+    //         .filter((e) => e.endsWith(".gz"))
+    //         .map((e) => parseInt(e.replace(".gz", ""))),
+    //       db: {
+    //         url: config.db.url,
+    //         orm: config.db.orm,
+    //       },
+    //     };
+    //   case "db-ver": {
+    //     return (await fs.read(`site:app/db/version`, "string")) || "";
+    //   }
+    //   case "db-sync": {
+    //     const res = await fetch(action.url);
+    //     const text = await res.text();
+    //     if (text) {
+    //       await Bun.write(fs.path("site:app/db/prisma/schema.prisma"), text);
+    //       await Bun.write(
+    //         fs.path(`site:app/db/version`),
+    //         Date.now().toString()
+    //       );
+    //     }
+    //     return "ok";
+    //   }
+    //   case "db-update":
+    //     if (action.url) {
+    //       config.db.url = action.url;
+    //       config.db.orm = action.orm;
+    //       const env = genEnv({
+    //         ...parseEnv(await Bun.file(fs.path("site:app/db/.env")).text()),
+    //         DATABASE_URL: action.url,
+    //       });
+    //       await Bun.write(fs.path("site:app/db/.env"), env);
+    //     }
+    //     return "ok";
+    //   case "db-gen":
+    //     {
+    //       await $`bun prisma generate`.cwd(fs.path("site:app/db"));
 
-          res.send("ok");
-          setTimeout(() => {
-            // restartServer();
-          }, 300);
-        }
-        break;
-      case "db-pull":
-        {
-          let env = await readAsync(fs.path("site:app/db/.env"));
-          if (env) {
-            const ENV = parseEnv(env);
-            if (typeof ENV.DATABASE_URL === "string") {
-              const type = ENV.DATABASE_URL.split("://").shift();
-              if (type) {
-                await writeAsync(
-                  fs.path("site:app/db/prisma/schema.prisma"),
-                  `\
-    generator client {
-      provider = "prisma-client-js"
-    }
+    //       res.send("ok");
+    //       setTimeout(() => {
+    //         // restartServer();
+    //       }, 300);
+    //     }
+    //     break;
+    //   case "db-pull":
+    //     {
+    //       let env = await readAsync(fs.path("site:app/db/.env"));
+    //       if (env) {
+    //         const ENV = parseEnv(env);
+    //         if (typeof ENV.DATABASE_URL === "string") {
+    //           const type = ENV.DATABASE_URL.split("://").shift();
+    //           if (type) {
+    //             await writeAsync(
+    //               fs.path("site:app/db/prisma/schema.prisma"),
+    //               `\
+    // generator client {
+    //   provider = "prisma-client-js"
+    // }
 
-    datasource db {
-      provider = "${type}"
-      url      = env("DATABASE_URL")
-    }`
-                );
+    // datasource db {
+    //   provider = "${type}"
+    //   url      = env("DATABASE_URL")
+    // }`
+    //             );
 
-                try {
-                  await Bun.write(
-                    fs.path("site:app/db/.env"),
-                    `DATABASE_URL=${ENV.DATABASE_URL}`
-                  );
-                  await $`bun install`.cwd(fs.path("site:app/db"));
-                  await $`bun prisma db pull --force`.cwd(
-                    fs.path("site:app/db")
-                  );
-                  await $`bun prisma generate`.cwd(fs.path("site:app/db"));
-                  await Bun.write(
-                    fs.path(`site:app/db/version`),
-                    Date.now().toString()
-                  );
-                } catch (e) {
-                  console.error(e);
-                }
-                res.send("ok");
-                setTimeout(() => {
-                  // restartServer();
-                }, 300);
-              }
-            }
-          }
-        }
-        break;
-      case "restart":
-        {
-          res.send("ok");
-          setTimeout(() => {
-            // restartServer();
-          }, 300);
-        }
-        break;
-      case "deploy-del":
-        {
-          await removeAsync(fs.path(`site:deploy/history/${action.ts}.gz`));
-          const deploys = readdirSync(fs.path(`site:deploy/history`));
+    //             try {
+    //               await Bun.write(
+    //                 fs.path("site:app/db/.env"),
+    //                 `DATABASE_URL=${ENV.DATABASE_URL}`
+    //               );
+    //               await $`bun install`.cwd(fs.path("site:app/db"));
+    //               await $`bun prisma db pull --force`.cwd(
+    //                 fs.path("site:app/db")
+    //               );
+    //               await $`bun prisma generate`.cwd(fs.path("site:app/db"));
+    //               await Bun.write(
+    //                 fs.path(`site:app/db/version`),
+    //                 Date.now().toString()
+    //               );
+    //             } catch (e) {
+    //               console.error(e);
+    //             }
+    //             res.send("ok");
+    //             setTimeout(() => {
+    //               // restartServer();
+    //             }, 300);
+    //           }
+    //         }
+    //       }
+    //     }
+    //     break;
+    //   case "restart":
+    //     {
+    //       res.send("ok");
+    //       setTimeout(() => {
+    //         // restartServer();
+    //       }, 300);
+    //     }
+    //     break;
+    //   case "deploy-del":
+    //     {
+    //       await removeAsync(fs.path(`site:deploy/history/${action.ts}.gz`));
+    //       const deploys = readdirSync(fs.path(`site:deploy/history`));
 
-          return {
-            now: Date.now(),
-            current: deploy.current,
-            deploys: deploys
-              .filter((e) => e.endsWith(".gz"))
-              .map((e) => parseInt(e.replace(".gz", ""))),
-          };
-        }
-        break;
-      case "deploy-status":
-        break;
-      case "deploy":
-        {
-          await _config.set("site_id", action.id_site);
+    //       return {
+    //         now: Date.now(),
+    //         current: deploy.current,
+    //         deploys: deploys
+    //           .filter((e) => e.endsWith(".gz"))
+    //           .map((e) => parseInt(e.replace(".gz", ""))),
+    //       };
+    //     }
+    //     break;
+    //   case "deploy-status":
+    //     break;
+    //   case "deploy":
+    //     {
+    //       await _config.set("site_id", action.id_site);
 
-          return {
-            now: Date.now(),
-            current: deploy.current,
-            deploys: config.deploy.history,
-          };
-        }
-        break;
-      case "redeploy":
-        {
-          // deploy.config.deploy.ts = action.ts;
-          // await deploy.saveConfig();
-          // await deploy.load(action.ts);
-          // const deploys = fs.readdirSync(dir(`/app/web/deploy`));
-          // return {
-          //   now: Date.now(),
-          //   current: parseInt(deploy.config.deploy.ts),
-          //   deploys: deploys
-          //     .filter((e) => e.endsWith(".gz"))
-          //     .map((e) => parseInt(e.replace(".gz", ""))),
-          // };
-        }
-        break;
-    }
+    //       return {
+    //         now: Date.now(),
+    //         current: deploy.current,
+    //         deploys: config.deploy.history,
+    //       };
+    //     }
+    //     break;
+    //   case "redeploy":
+    //     {
+    //       // deploy.config.deploy.ts = action.ts;
+    //       // await deploy.saveConfig();
+    //       // await deploy.load(action.ts);
+    //       // const deploys = fs.readdirSync(dir(`/app/web/deploy`));
+    //       // return {
+    //       //   now: Date.now(),
+    //       //   current: parseInt(deploy.config.deploy.ts),
+    //       //   deploys: deploys
+    //       //     .filter((e) => e.endsWith(".gz"))
+    //       //     .map((e) => parseInt(e.replace(".gz", ""))),
+    //       // };
+    //     }
+    //     break;
+    // }
   },
 };
 

@@ -1,10 +1,10 @@
 import mime from "mime";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { fs } from "utils/fs";
 
 export const _ = {
   url: "/_finfo/**",
-  async api() {
+  async api(): ApiResponse {
     const { req } = apiContext(this);
     let rpath = decodeURIComponent(req.params._);
     rpath = rpath

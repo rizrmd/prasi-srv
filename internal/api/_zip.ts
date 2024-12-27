@@ -1,15 +1,15 @@
+import type { ApiResponse } from "utils/api-context";
 
 export const _ = {
   url: "/_zip",
   raw: true,
-  async api() {
+  async api(): ApiResponse {
     // await $`rm bundle*`.nothrow().quiet().cwd(`${prasi.datadir}`);
     // await copyAsync(
     //   dir(`pkgs/empty_bundle.sqlite`),
     //   dir(`${prasi.datadir}/bundle.sqlite`)
     // );
     // const db = new Database(dir(`${prasi.datadir}/bundle.sqlite`));
-
     // const ts = prasi.deploy.config.deploy.ts;
     // const add = ({
     //   path,
@@ -33,7 +33,6 @@ export const _ = {
     //     });
     //   }
     // };
-
     // add({ path: "version", type: "", content: deploy.config.deploy.ts + "" });
     // add({ path: "site_id", type: "", content: deploy.config.site_id + "" });
     // add({
@@ -42,16 +41,13 @@ export const _ = {
     //   content: prasi.deploy.content?.site?.config?.api_url || "",
     // });
     // const gz = prasi.deploy.content;
-
     // if (gz) {
     //   let layout = null as null | SinglePage;
     //   for (const l of gz.layouts) {
     //     if (!layout) layout = l;
     //     if (l.is_default_layout) layout = l;
     //   }
-
     //   let api_url = (gz.site as any)?.config?.api_url;
-
     //   add({
     //     path: "route",
     //     type: "",
@@ -69,21 +65,18 @@ export const _ = {
     //       },
     //     }),
     //   });
-
     //   add({
     //     path: "load-js",
     //     type: "",
     //     content: await getContent("load.js.prod", `"${api_url}"`),
     //   });
     // }
-
     // for (const [directory, files] of Object.entries(
     //   prasi.deploy.content || {}
     // )) {
     //   if (directory !== "code" && directory !== "site") {
     //     for (const comp of Object.values(files) as any) {
     //       let filepath = `${prasi.datadir}/bundle/${directory}/${comp.id}.json`;
-
     //       add({
     //         path: filepath,
     //         type: mime.getType(filepath) || "text/plain",
@@ -100,7 +93,6 @@ export const _ = {
     //   } else {
     //     for (const [filename, content] of Object.entries(files)) {
     //       let filepath = `${prasi.datadir}/bundle/${directory}/${filename}`;
-
     //       if (content instanceof Buffer || typeof content === "string") {
     //         add({
     //           path: filepath,
@@ -128,7 +120,6 @@ export const _ = {
     //     }
     //   }
     // }
-
     // await $`zip "bundle-${ts}.zip" bundle.sqlite`
     //   .nothrow()
     //   .quiet()

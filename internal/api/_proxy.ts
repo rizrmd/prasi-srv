@@ -1,9 +1,9 @@
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 
 export const _ = {
   url: "/_proxy/**",
   raw: true,
-  async api() {
+  async api(): ApiResponse {
     const { req } = apiContext(this);
 
     try {

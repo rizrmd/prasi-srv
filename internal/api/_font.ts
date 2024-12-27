@@ -1,4 +1,4 @@
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 
 const g = global as unknown as {
   _font_cache: Record<string, { body: any; headers: any }>;
@@ -10,7 +10,7 @@ if (!g._font_cache) {
 
 export const _ = {
   url: "/_font/**",
-  async api() {
+  async api(): ApiResponse {
     const { req } = apiContext(this);
     const pathname = req.url.split("/_font").pop() || "";
     const cache = g._font_cache[pathname];

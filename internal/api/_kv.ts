@@ -1,4 +1,4 @@
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { BunSqliteKeyValue } from "bun-sqlite-key-value";
 import { fs } from "utils/fs";
 import { prasi } from "main/prasi-var";
@@ -6,7 +6,11 @@ import { prasi } from "main/prasi-var";
 export const _ = {
   url: "/_kv",
   raw: true,
-  async api(mode: "get" | "set" | "del", key: string, value?: any) {
+  async api(
+    mode: "get" | "set" | "del",
+    key: string,
+    value?: any
+  ): ApiResponse {
     const { req } = apiContext(this);
 
     if (!prasi.ext.kv) {

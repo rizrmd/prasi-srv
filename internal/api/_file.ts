@@ -8,12 +8,12 @@ import {
 import { readdir, stat } from "fs/promises";
 import mime from "mime";
 import { basename, dirname } from "path";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { fs } from "utils/fs";
 
 export const _ = {
   url: "/_file/**",
-  async api() {
+  async api(): ApiResponse {
     const { req } = apiContext(this);
     let rpath = decodeURIComponent(req.params._);
     rpath = rpath
@@ -43,9 +43,10 @@ export const _ = {
           );
         }
 
-        return new Response(JSON.stringify({ status: "ok" }), {
+        return {
+          body: { status: "ok" },
           headers: { "content-type": "application/json" },
-        });
+        };
       } else if (typeof req.query_parameters["del"] === "string") {
         if (rpath) {
           const base_dir = fs.path(`uploadfiles/${rpath}`);
@@ -61,9 +62,10 @@ export const _ = {
           }
         }
 
-        return new Response(JSON.stringify({ status: "ok" }), {
+        return {
+          body: { status: "ok" },
           headers: { "content-type": "application/json" },
-        });
+        };
       } else if (typeof req.query_parameters["rename"] === "string") {
         let rename = req.query_parameters["rename"];
 
@@ -84,9 +86,10 @@ export const _ = {
           newname = `/${dirname(rpath)}/${rename}`;
         }
 
-        return new Response(JSON.stringify({ newname }), {
+        return {
+          body: { newname },
           headers: { "content-type": "application/json" },
-        });
+        };
       } else if (typeof req.query_parameters["dir"] === "string") {
         try {
           const files = [] as {
@@ -106,13 +109,16 @@ export const _ = {
               });
             })
           );
-          return new Response(JSON.stringify(files), {
+
+          return {
+            body: files,
             headers: { "content-type": "application/json" },
-          });
+          };
         } catch (e) {
-          return new Response(JSON.stringify(null), {
+          return {
+            body: "null",
             headers: { "content-type": "application/json" },
-          });
+          };
         }
       }
     }

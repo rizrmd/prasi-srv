@@ -1,18 +1,21 @@
 import { gunzipSync } from "bun";
 import { unpack } from "msgpackr";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { execQuery } from "utils/query";
 
 const g = global as any;
 export const _ = {
   url: "/_dbs/*",
   raw: true,
-  async api() {
+  async api(): ApiResponse {
     const ctx = apiContext(this);
-    const { req, res } = ctx;
+    const { req } = ctx;
     if (typeof g.db !== "undefined") {
       if (req.params._ === "check") {
-        return { mode: "encrypted" };
+        return {
+          body: { mode: "encrypted" },
+          headers: { "content-type": "application/json" },
+        };
       }
 
       try {
@@ -21,15 +24,14 @@ export const _ = {
         try {
           const result = await execQuery(body, g.db);
           return result;
-        } catch (e: any) {
-          console.log("_dbs error", body, e.message);
-          res.sendStatus(500);
-          res.send(e.message);
-        }
-      } catch (e) {
-        res.sendStatus(500);
-        res.send('{status: "unauthorized"}');
-      }
+        } catch (e: any) {}
+      } catch (e) {}
     }
+
+    return {
+      body: { status: "unauthorized" },
+      headers: { "content-type": "application/json" },
+      status: 500,
+    };
   },
 };

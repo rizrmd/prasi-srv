@@ -1,6 +1,7 @@
 import type { Server } from "bun";
 import { prasi } from "main/prasi-var";
 import type { PrasiHttpHandler } from "typings/server";
+import { route_api } from "./route-api";
 
 export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
   const handle: PrasiHttpHandler = async function (
@@ -10,24 +11,30 @@ export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
   ) {
     let body: any = null;
     let headers = undefined as any;
+    let status = 200;
     const url = this.url;
 
     const static_file = prasi.static.exists(url.pathname);
     if (static_file) {
       body = Bun.file(static_file.data.fullpath);
     } else {
-      
+      const api = await route_api.handle(this.url.pathname, req);
+      if (api) {
+        body = api.body;
+        headers = api.headers;
+        status = api.status;
+      }
+    }
+
+    if (body === null) {
+      // body = route_index.handle()
     }
 
     if (opt?.rewrite) {
       body = opt.rewrite({ body, headers });
     }
 
-    if (body === null) {
-      return new Response("Page Not Found", { status: 404 });
-    }
-
-    return new Response(body, { headers });
+    return new Response(body, { headers, status });
   };
 
   const index = {

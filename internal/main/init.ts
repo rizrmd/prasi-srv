@@ -37,6 +37,7 @@ export const init = async ({
   mode: "vm" | "server";
   action?: "reload" | "start";
 }) => {
+  prasi.mode = mode;
   const script_dir = init_prasi.paths.dir.build;
 
   if (!script_dir) {
@@ -59,7 +60,7 @@ export const init = async ({
     await initConfig();
   }
 
-  const { api_route } = await import("./handler/api-route");
+  const { route_api: api_route } = await import("./handler/route-api");
   await api_route.init();
 
   prasi.static = await staticFile(script_dir);

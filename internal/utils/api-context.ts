@@ -1,6 +1,10 @@
 import mime from "mime";
 import { binaryExtensions } from "./binary-ext";
-
+export type ApiResponse = Promise<void | {
+  body: any;
+  headers: any;
+  status?: number;
+}>;
 const parseQueryParams = (ctx: any) => {
   const pageHref = ctx.req.url;
   const searchParams = new URLSearchParams(
@@ -13,6 +17,7 @@ const parseQueryParams = (ctx: any) => {
 
   return result as any;
 };
+
 export const apiContext = (ctx: any) => {
   ctx.req.params = ctx.params;
 
@@ -24,22 +29,6 @@ export const apiContext = (ctx: any) => {
   ctx.req.query_parameters = parseQueryParams(ctx);
   return {
     req: ctx.req as Request & { params: any; query_parameters: any },
-    res: {
-      ...ctx.res,
-      send: (body) => {
-        ctx.res = createResponse(body, { res: ctx.res });
-      },
-      sendStatus: (code: number) => {
-        ctx.res._status = code;
-      },
-      setHeader: (key: string, value: string) => {
-        ctx.res.headers.append(key, value);
-      },
-    } as Response & {
-      send: (body?: string | object) => void;
-      setHeader: (key: string, value: string) => void;
-      sendStatus: (code: number) => void;
-    },
   };
 };
 

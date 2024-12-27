@@ -2,14 +2,14 @@ import { dirAsync } from "fs-jetpack";
 import { stat } from "fs/promises";
 import { dirname, parse } from "path";
 import sharp from "sharp";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { fs } from "utils/fs";
 
 const modified = {} as Record<string, number>;
 
 export const _ = {
   url: "/_img/**",
-  async api() {
+  async api(): ApiResponse {
     const { req } = apiContext(this);
     let res = new Response("NOT FOUND", { status: 404 });
 

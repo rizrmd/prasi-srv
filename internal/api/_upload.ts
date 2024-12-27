@@ -1,13 +1,13 @@
 import mp from "@surfy/multipart-parser";
 import { dirAsync, existsAsync } from "fs-jetpack";
 import { dirname, format, parse } from "path";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { fs } from "utils/fs";
 
 export const _ = {
   url: "/_upload",
   raw: true,
-  async api(body: any) {
+  async api(body: any): ApiResponse {
     const { req } = apiContext(this);
     const raw = await req.arrayBuffer();
     const parts = mp(Buffer.from(raw)) as Record<

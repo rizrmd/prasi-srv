@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 import admin from "firebase-admin";
 import { listAsync } from "fs-jetpack";
 import { prasi } from "main/prasi-var";
-import { apiContext } from "utils/api-context";
+import { apiContext, type ApiResponse } from "utils/api-context";
 import { fs } from "utils/fs";
 
 export const _ = {
@@ -12,11 +12,14 @@ export const _ = {
     data:
       | { type: "register"; token: string; id: string }
       | { type: "send"; id: string; body: string; title: string; data?: any }
-  ) {
+  ): ApiResponse {
     const { req } = apiContext(this);
 
     if (action === "list") {
-      return await listAsync(fs.path("public"));
+      return {
+        body: await listAsync(fs.path("public")),
+        headers: { "content-type": "application/json" },
+      };
     }
 
     if (!prasi.ext.firebase?.init) {
@@ -63,9 +66,15 @@ export const _ = {
                   );
                 }
 
-                return { result: "OK" };
+                return {
+                  body: { result: "OK" },
+                  headers: { "content-type": "application/json" },
+                };
               } else {
-                return { error: "missing token" };
+                return {
+                  body: { error: "missing token" },
+                  headers: { "content-type": "application/json" },
+                };
               }
             }
           }
@@ -90,13 +99,19 @@ export const _ = {
                 }
               }
 
-              return { result: "OK", totalDevice: result.length };
+              return {
+                body: { result: "OK", totalDevice: result.length },
+                headers: { "content-type": "application/json" },
+              };
             }
           }
           break;
       }
     }
 
-    return { error: "missing ./firebase-admin.json" };
+    return {
+      body: { error: "missing ./firebase-admin.json" },
+      headers: { "content-type": "application/json" },
+    };
   },
 };
