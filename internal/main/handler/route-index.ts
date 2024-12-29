@@ -6,7 +6,7 @@ import { join } from "path";
 const default_route = {
   _head: [] as string[],
   _cached: false,
-  handle(site_id: string, opt: { page_id?: string; params?: any }) {
+  handle(site_id: string) {
     if ((!this._cached && prasi.mode === "vm") || prasi.dev) {
       this._cached = true;
       const _cache = readFileSync(join(prasi.static.nova, "index.html"), {
@@ -22,6 +22,9 @@ const default_route = {
         }),
       ];
     }
+
+    console.log(prasi.content);
+
     const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
     const current = { page_id: undefined, params: undefined };
 

@@ -13999,7 +13999,7 @@ var import_path4 = require("path");
 var default_route = {
   _head: [],
   _cached: false,
-  handle(site_id, opt) {
+  handle(site_id) {
     if (!this._cached && prasi.mode === "vm" || prasi.dev) {
       this._cached = true;
       const _cache = import_fs4.readFileSync(import_path4.join(prasi.static.nova, "index.html"), {
@@ -14015,6 +14015,7 @@ var default_route = {
         })
       ];
     }
+    console.log(prasi.content);
     const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
     const current = { page_id: undefined, params: undefined };
     return `<!DOCTYPE html>
@@ -14046,25 +14047,29 @@ var default_route = {
 var route_index = globalThis.route_index = default_route;
 
 // internal/main/handler/http-handler.ts
-var createHttpHandler = (server, mode) => {
+var createHttpHandler = (mode) => {
   const handle = async function(req, opt) {
     let body = null;
     let headers = undefined;
     let status = 200;
     const url = this.url;
+    let is_file = false;
     if (url.pathname.startsWith("/nova")) {
       const nova_file = import_path5.join(prasi.static.nova, url.pathname.substring(6));
       if (nova_file) {
         body = Bun.file(nova_file);
+        is_file = true;
       }
     } else {
       const frontend_file = prasi.static.frontend.exists(url.pathname);
       if (frontend_file) {
         body = Bun.file(frontend_file.data.fullpath);
+        is_file = true;
       } else {
         const public_file = prasi.static.public.exists(url.pathname);
         if (public_file) {
           body = Bun.file(public_file.data.fullpath);
+          is_file = true;
         } else {
           const api = await route_api.handle(this.url.pathname, req);
           if (api) {
@@ -14075,16 +14080,20 @@ var createHttpHandler = (server, mode) => {
         }
       }
       if (body === null && ![".js", ".css"].find((e) => url.pathname.endsWith(e))) {
-        body = route_index.handle(prasi.site_id, {});
-        headers = { "content-type": "text/html" };
+        body = route_index.handle(prasi.site_id);
+        let new_headers = {};
+        head(headers || new_headers, "content-type", "text/html");
+        if (!headers) {
+          headers = new_headers;
+        }
       }
+    }
+    if (typeof body === "object" && body && !is_file) {
+      body = JSON.stringify(body);
+      head(headers, "content-type", "application/json");
     }
     if (opt?.rewrite) {
       body = opt.rewrite({ body, headers });
-    }
-    if (typeof body === "object" && body && !body.prototype && headers["content-type"] !== "application/json") {
-      body = JSON.stringify(body);
-      headers["content-type"] = "application/json";
     }
     return new Response(body, { headers, status });
   };
@@ -14094,26 +14103,44 @@ var createHttpHandler = (server, mode) => {
     render: () => ""
   };
   const handler = async (req) => {
-    const server2 = prasi.server;
-    if (server2 && typeof server2.http === "function") {
+    const server = prasi.server;
+    if (server && typeof server.http === "function") {
       const url = new URL(req.url);
       if (mode === "dev") {
         const parts = url.pathname.split("/");
         url.pathname = "/" + parts.slice(3).join("/");
       }
-      return await server2.http({
+      return await server.http({
         handle: handle.bind({ url }),
         index,
         mode,
         prasi: { page_id: "", params: {} },
         req,
-        server: server2,
+        server,
         url: { pathname: url.pathname, raw: url }
       });
     }
     return new Response("Page Not Found", { status: 404 });
   };
   return handler;
+};
+var head = (headers, name, set_value) => {
+  if (!headers) {
+    if (typeof set_value === "string") {
+      return { [name]: set_value };
+    }
+    return "";
+  }
+  if (headers instanceof Headers) {
+    if (typeof set_value === "string") {
+      headers.set(name, set_value);
+    }
+    return headers.get(name);
+  }
+  if (typeof set_value === "string") {
+    headers[name] = set_value;
+  }
+  return headers[name];
 };
 
 // internal/main/handler/ws-handler.ts
@@ -14187,7 +14214,7 @@ var init2 = async ({
     await prasi.server.init({ port: server_instance.port });
   }
   prasi.handler = {
-    http: createHttpHandler(server_instance, mode === "vm" ? "dev" : "prod"),
+    http: createHttpHandler(mode === "vm" ? "dev" : "prod"),
     ws: createWsHandler()
   };
 };

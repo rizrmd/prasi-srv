@@ -118,7 +118,7 @@ export const init = async ({
   }
 
   prasi.handler = {
-    http: createHttpHandler(server_instance, mode === "vm" ? "dev" : "prod"),
+    http: createHttpHandler(mode === "vm" ? "dev" : "prod"),
     ws: createWsHandler(),
   };
 };
