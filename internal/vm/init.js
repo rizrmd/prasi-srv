@@ -14016,26 +14016,20 @@ var route_index = {
         })
       ];
     }
-    return {
-      head: [...this._head],
-      body: [],
-      render() {
-        const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
-        const current = { page_id: undefined, params: undefined };
-        return `<!DOCTYPE html>
+    const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
+    const current = { page_id: undefined, params: undefined };
+    return `<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=1.0, minimum-scale=1.0, maximum-scale=1.0">
-  ${this.head.join(`
+  ${this._head.join(`
 `)}
 </head>
 
 <body class="flex-col flex-1 w-full min-h-screen flex opacity-0">
-  ${this.body.join(`
-`)}
   <div id="root"></div>
   <script>
     window._prasi = { 
@@ -14048,8 +14042,6 @@ var route_index = {
 </body>
 
 </html>`;
-      }
-    };
   }
 };
 
@@ -14083,11 +14075,8 @@ var createHttpHandler = (server, mode) => {
         }
       }
       if (body === null && ![".js", ".css"].find((e) => url.pathname.endsWith(e))) {
-        const index2 = route_index.handle(prasi.site_id, {});
-        if (index2) {
-          body = index2.render();
-          headers = { "content-type": "text/html" };
-        }
+        body = route_index.handle(prasi.site_id, {});
+        headers = { "content-type": "text/html" };
       }
     }
     if (typeof body === "object" && body) {

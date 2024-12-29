@@ -43,11 +43,8 @@ export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
         body === null &&
         ![".js", ".css"].find((e) => url.pathname.endsWith(e))
       ) {
-        const index = route_index.handle(prasi.site_id, {});
-        if (index) {
-          body = index.render();
-          headers = { "content-type": "text/html" };
-        }
+        body = route_index.handle(prasi.site_id, {});
+        headers = { "content-type": "text/html" };
       }
     }
 

@@ -28,15 +28,10 @@ export const route_index = {
         }),
       ];
     }
+    const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
+    const current = { page_id: undefined, params: undefined };
 
-    return {
-      head: [...this._head],
-      body: [] as string[],
-      render() {
-        const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
-
-        const current = { page_id: undefined, params: undefined };
-        return `\
+    return `\
 <!DOCTYPE html>
 <html lang="en">
 
@@ -44,28 +39,25 @@ export const route_index = {
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=1.0, minimum-scale=1.0, maximum-scale=1.0">
-  ${this.head.join("\n")}
+  ${this._head.join("\n")}
 </head>
 
 <body class="flex-col flex-1 w-full min-h-screen flex opacity-0">
-  ${this.body.join("\n")}
   <div id="root"></div>
   <script>
     window._prasi = { 
       basepath: "${base_path}/", 
       site_id: "${site_id}",${
-          current.page_id ? `\n      page_id: "${current.page_id}",` : ""
-        }${
-          typeof current.params === "object"
-            ? `\n      params: ${JSON.stringify(current.params)},`
-            : ""
-        }
+      current.page_id ? `\n      page_id: "${current.page_id}",` : ""
+    }${
+      typeof current.params === "object"
+        ? `\n      params: ${JSON.stringify(current.params)},`
+        : ""
+    }
     }
   </script>
 </body>
 
 </html>`;
-      },
-    };
   },
 };
