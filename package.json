@@ -28,6 +28,7 @@
     "mime": "^4.0.6",
     "msgpackr": "^1.11.2",
     "multipasta": "^0.2.5",
+    "node-html-parser": "^7.0.1",
     "rou3": "^0.5.1",
     "sharp": "^0.33.5",
     "uuid": "^11.0.3"

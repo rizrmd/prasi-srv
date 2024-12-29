@@ -44,6 +44,7 @@ export const staticFile = async (
   const static_file = {
     scanning: false,
     paths: new Set<string>(),
+    root: path,
     async rescan(arg?: { immediately?: boolean }) {
       // rescan will be overwritten after static_file definition.
     },
@@ -98,7 +99,7 @@ export const staticFile = async (
       return;
     }
     static_file.scanning = true;
-    if (await existsAsync(path)) {
+    if (path && await existsAsync(path)) {
       if (static_file.paths.size > 0) {
         store.gz.delete([...static_file.paths]);
         store.zstd.delete([...static_file.paths]);

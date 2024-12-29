@@ -13,8 +13,13 @@ if (!(globalThis as any).prasi) {
 
 export const prasi = (globalThis as any).prasi as unknown as {
   static_cache: any;
-  static: StaticFile;
-  mode: "vm" | "server"
+  site_id: string;
+  static: {
+    frontend: StaticFile;
+    public: StaticFile;
+    nova: string;
+  };
+  mode: "vm" | "server";
   ext: {
     kv?: BunSqliteKeyValue;
     firebase?: {
@@ -30,7 +35,7 @@ export const prasi = (globalThis as any).prasi as unknown as {
     http: (req: Request) => Promise<Response>;
     ws: WebSocketHandler<{ url: URL }>;
   };
-  site?: {
+  deployed?: {
     db?: SiteConfig["db"];
     layouts: {
       id: string;

@@ -16,6 +16,7 @@ export const init = async ({
   mode,
   prasi: init_prasi,
   action,
+  handler,
 }: {
   site_id: string;
   prasi: {
@@ -26,6 +27,7 @@ export const init = async ({
       server: string;
       typings: string;
       dir: {
+        nova: string;
         site: string;
         build: string;
         upload: string;
@@ -36,19 +38,23 @@ export const init = async ({
   server: (server: PrasiServer) => Server;
   mode: "vm" | "server";
   action?: "reload" | "start";
+  handler: {
+    pages: (ids: string[]) => Promise<Record<string, any>>;
+  };
 }) => {
   prasi.mode = mode;
-  const script_dir = init_prasi.paths.dir.build;
+  const build_dir = init_prasi.paths.dir.build;
 
-  if (!script_dir) {
+  if (!build_dir) {
     console.error(`dir.build is empty, please check prasi.json!`);
     return;
   }
 
-  const script_path = join(
-    script_dir,
+  const backend_path = join(
+    build_dir,
     init_prasi.paths.server.replace(".ts", ".js")
   );
+  const frontend_dir = dirname(join(build_dir, init_prasi.paths.index));
 
   fs.init({
     site: init_prasi.paths.dir.site,
@@ -63,18 +69,23 @@ export const init = async ({
   const { route_api: api_route } = await import("./handler/route-api");
   await api_route.init();
 
-  prasi.static = await staticFile(script_dir);
+  prasi.static = {
+    frontend: await staticFile(frontend_dir),
+    public: await staticFile(init_prasi.paths.dir.public),
+    nova: init_prasi.paths.dir.nova,
+  };
+  prasi.site_id = site_id;
 
   if (mode === "vm") {
-    const src = await Bun.file(script_path).text();
-    const script = new Script(src, { filename: script_path });
+    const src = await Bun.file(backend_path).text();
+    const script = new Script(src, { filename: backend_path });
     const ctx = { module: { exports: { server: null as any } } };
     const cjs = script.runInThisContext();
     cjs(ctx.module.exports, require, ctx.module);
     prasi.server = ctx.module.exports.server;
   } else {
-    delete require.cache[script_path];
-    const module = require(script_path);
+    delete require.cache[backend_path];
+    const module = require(backend_path);
     prasi.server = module.server;
   }
   process.chdir(

@@ -18,7 +18,7 @@ export const loadCurrentDeploy = async (ts: number) => {
       )
     );
 
-    prasi.site = {
+    prasi.deployed = {
       layouts: content.layouts,
       pages: content.pages,
       comps: content.comps,
