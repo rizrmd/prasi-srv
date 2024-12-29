@@ -76,6 +76,7 @@ export const route_api = {
         if (req.method !== "GET") {
           try {
             const json = await req.json();
+
             if (Array.isArray(json)) {
               for (const i in json) {
                 const arg_name = args[i];
@@ -83,6 +84,10 @@ export const route_api = {
                   params[arg_name] = json[i];
                 }
                 arg_val.push(json[i]);
+              }
+            } else if (json) {
+              for (const [k, v] of Object.entries(json)) {
+                (params as any)[k] = v;
               }
             }
           } catch (e) {}

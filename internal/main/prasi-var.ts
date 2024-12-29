@@ -12,6 +12,7 @@ if (!(globalThis as any).prasi) {
 }
 export type PrasiContent = {
   pages: (ids: string[]) => Promise<Record<string, any>>;
+  comps: (ids: string[]) => Promise<Record<string, any>>;
   route: (
     pathname: string
   ) => undefined | { params: Record<string, any>; data: { page_id: string } };

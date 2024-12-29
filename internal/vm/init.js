@@ -6248,6 +6248,10 @@ var init_route_api = __esm(() => {
                   }
                   arg_val.push(json[i]);
                 }
+              } else if (json) {
+                for (const [k, v] of Object.entries(json)) {
+                  params[k] = v;
+                }
               }
             } catch (e) {
             }
