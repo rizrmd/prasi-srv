@@ -2,6 +2,7 @@ import type { WebSocketHandler } from "bun";
 import type { BunSqliteKeyValue } from "bun-sqlite-key-value";
 import type { Database } from "bun:sqlite";
 import type { initializeApp } from "firebase-admin";
+import type { IPage } from "typings/content";
 import type { PrasiServer } from "typings/server";
 import { type SiteConfig } from "utils/config";
 import type { StaticFile } from "utils/static";
@@ -10,9 +11,18 @@ if (!(globalThis as any).prasi) {
   (globalThis as any).prasi = {};
 }
 export type PrasiContent = {
-    pages: (ids: string[]) => Promise<Record<string, any>>;
-    page_url: (pathname: string) => string;
-  }
+  pages: (ids: string[]) => Promise<Record<string, any>>;
+  route: (
+    pathname: string
+  ) => undefined | { params: Record<string, any>; data: { page_id: string } };
+  all_routes: () => Promise<{
+    site: { id: string; api_url: string };
+    urls: { id: string; url: string }[];
+    layout: { id: string; root: IPage };
+  }>;
+};
+
+export type PrasiGlobal = typeof prasi;
 
 export const prasi = (globalThis as any).prasi as unknown as {
   static_cache: any;

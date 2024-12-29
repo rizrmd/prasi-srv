@@ -44,6 +44,7 @@ export const init = async ({
 }) => {
   prasi.mode = mode;
   prasi.content = content;
+
   const build_dir = init_prasi.paths.dir.build;
 
   if (!build_dir) {
@@ -81,7 +82,10 @@ export const init = async ({
   if (mode === "vm") {
     const src = await Bun.file(backend_path).text();
     const script = new Script(src, { filename: backend_path });
-    const ctx = { module: { exports: { server: null as any } } };
+    const ctx = {
+      module: { exports: { server: null as any } },
+      prasi_global: prasi,
+    };
     const cjs = script.runInThisContext();
     cjs(ctx.module.exports, require, ctx.module);
     prasi.server = ctx.module.exports.server;
@@ -118,7 +122,7 @@ export const init = async ({
   }
 
   prasi.handler = {
-    http: createHttpHandler(mode === "vm" ? "dev" : "prod"),
+    http: await createHttpHandler(prasi, mode === "vm" ? "dev" : "prod"),
     ws: createWsHandler(),
   };
 };

@@ -1,4 +1,5 @@
 import { inspectAsync, listAsync } from "fs-jetpack";
+import type { PrasiGlobal } from "main/prasi-var";
 import { join } from "path";
 import { addRoute, createRouter, type RouterContext, findRoute } from "rou3";
 import { siteLog } from "utils/log";
@@ -63,7 +64,8 @@ export const route_api = {
     };
     await scan("internal/api");
   },
-  async handle(pathname: string, req: Request) {
+  async handle(url: URL, req: Request, prasi: PrasiGlobal) {
+    const pathname = url.pathname;
     if (this._router) {
       const found = findRoute(this._router, undefined, pathname);
       if (found) {
@@ -86,7 +88,7 @@ export const route_api = {
           } catch (e) {}
         }
 
-        const res = await fn.bind({ req, params })(...arg_val);
+        const res = await fn.bind({ req, params, url, prasi })(...arg_val);
 
         if (typeof res.headers === "object" && res.headers) {
           if (res instanceof Response) {

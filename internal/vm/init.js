@@ -4976,7 +4976,7 @@ var require_wasm = __commonJS((exports2, module2) => {
   var imports = {};
   imports["__wbindgen_placeholder__"] = module2.exports;
   var wasm;
-  var { TextEncoder, TextDecoder } = require("util");
+  var { TextEncoder: TextEncoder2, TextDecoder } = require("util");
   var heap = new Array(128).fill(undefined);
   heap.push(undefined, null, true, false);
   function getObject(idx) {
@@ -5002,7 +5002,7 @@ var require_wasm = __commonJS((exports2, module2) => {
     }
     return cachedUint8ArrayMemory0;
   }
-  var cachedTextEncoder = new TextEncoder("utf-8");
+  var cachedTextEncoder = new TextEncoder2("utf-8");
   var encodeString = typeof cachedTextEncoder.encodeInto === "function" ? function(arg, view) {
     return cachedTextEncoder.encodeInto(arg, view);
   } : function(arg, view) {
@@ -6228,7 +6228,8 @@ var init_route_api = __esm(() => {
       };
       await scan("internal/api");
     },
-    async handle(pathname, req) {
+    async handle(url, req, prasi2) {
+      const pathname = url.pathname;
       if (this._router) {
         const found = findRoute(this._router, undefined, pathname);
         if (found) {
@@ -6251,7 +6252,7 @@ var init_route_api = __esm(() => {
             } catch (e) {
             }
           }
-          const res = await fn.bind({ req, params })(...arg_val);
+          const res = await fn.bind({ req, params, url, prasi: prasi2 })(...arg_val);
           if (typeof res.headers === "object" && res.headers) {
             if (res instanceof Response) {
               return res;
@@ -11797,7 +11798,7 @@ var require_dist = __commonJS((exports2) => {
 // internal/main/init.ts
 var exports_init = {};
 __export(exports_init, {
-  init: () => init2
+  init: () => init3
 });
 module.exports = __toCommonJS(exports_init);
 var import_node_vm = require("vm");
@@ -13999,7 +14000,7 @@ var import_path4 = require("path");
 var default_route = {
   _head: [],
   _cached: false,
-  handle(site_id) {
+  handle(site_id, pathname) {
     if (!this._cached && prasi.mode === "vm" || prasi.dev) {
       this._cached = true;
       const _cache = import_fs4.readFileSync(import_path4.join(prasi.static.nova, "index.html"), {
@@ -14015,9 +14016,16 @@ var default_route = {
         })
       ];
     }
-    console.log(prasi.content);
     const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
-    const current = { page_id: undefined, params: undefined };
+    const current = {
+      page_id: undefined,
+      params: undefined
+    };
+    const found = prasi.content.route(pathname);
+    if (found) {
+      current.page_id = found.data.page_id;
+      current.params = found.params;
+    }
     return `<!DOCTYPE html>
 <html lang="en">
 
@@ -14047,31 +14055,43 @@ var default_route = {
 var route_index = globalThis.route_index = default_route;
 
 // internal/main/handler/http-handler.ts
-var createHttpHandler = (mode) => {
+var zstd2 = __toESM(require_index_node());
+var encoder = new TextEncoder;
+var createHttpHandler = async (prasi2, mode) => {
+  await zstd2.init();
   const handle = async function(req, opt) {
     let body = null;
     let headers = undefined;
     let status = 200;
+    const set_headers = (v) => {
+      if (!headers) {
+        headers = v;
+      }
+      if (headers instanceof Headers && v instanceof Headers) {
+      } else {
+        headers = { ...headers, ...v };
+      }
+    };
     const url = this.url;
     let is_file = false;
     if (url.pathname.startsWith("/nova")) {
-      const nova_file = import_path5.join(prasi.static.nova, url.pathname.substring(6));
+      const nova_file = import_path5.join(prasi2.static.nova, url.pathname.substring(6));
       if (nova_file) {
         body = Bun.file(nova_file);
         is_file = true;
       }
     } else {
-      const frontend_file = prasi.static.frontend.exists(url.pathname);
+      const frontend_file = prasi2.static.frontend.exists(url.pathname);
       if (frontend_file) {
         body = Bun.file(frontend_file.data.fullpath);
         is_file = true;
       } else {
-        const public_file = prasi.static.public.exists(url.pathname);
+        const public_file = prasi2.static.public.exists(url.pathname);
         if (public_file) {
           body = Bun.file(public_file.data.fullpath);
           is_file = true;
         } else {
-          const api = await route_api.handle(this.url.pathname, req);
+          const api = await route_api.handle(this.url, req, prasi2);
           if (api) {
             body = api.body;
             headers = api.headers;
@@ -14080,9 +14100,12 @@ var createHttpHandler = (mode) => {
         }
       }
       if (body === null && ![".js", ".css"].find((e) => url.pathname.endsWith(e))) {
-        body = route_index.handle(prasi.site_id);
+        body = route_index.handle(prasi2.site_id, url.pathname);
         let new_headers = {};
-        head(headers || new_headers, "content-type", "text/html");
+        head(headers || new_headers, "content-type", [
+          set_headers,
+          "text/html"
+        ]);
         if (!headers) {
           headers = new_headers;
         }
@@ -14090,10 +14113,50 @@ var createHttpHandler = (mode) => {
     }
     if (typeof body === "object" && body && !is_file) {
       body = JSON.stringify(body);
-      head(headers, "content-type", "application/json");
+      head(headers, "content-type", [set_headers, "application/json"]);
     }
     if (opt?.rewrite) {
       body = opt.rewrite({ body, headers });
+    }
+    const accept = req.headers.get("accept-encoding");
+    if (accept && !head(headers, "content-encoding")) {
+      let compression = "";
+      if (accept.includes("zstd")) {
+        compression = "zstd";
+      } else if (accept.includes("gzip")) {
+        compression = "gzip";
+      }
+      if (compression) {
+        let should_compress = true;
+        if (is_file) {
+          const file = body;
+          if (!headers) {
+            headers = { "content-type": body.type };
+          }
+          if (file.size === 0) {
+            should_compress = false;
+          }
+        }
+        if (should_compress) {
+          if (compression === "gzip") {
+            head(headers, "content-encoding", [set_headers, "gzip"]);
+            if (is_file) {
+              const file = body;
+              body = Bun.gzipSync(await file.arrayBuffer());
+            } else {
+              body = Bun.gzipSync(body);
+            }
+          } else if (compression = "zstd") {
+            head(headers, "content-encoding", [set_headers, "zstd"]);
+            if (is_file) {
+              const file = body;
+              body = zstd2.compress(new Uint8Array(await file.arrayBuffer()), 10);
+            } else {
+              body = zstd2.compress(encoder.encode(body), 10);
+            }
+          }
+        }
+      }
     }
     return new Response(body, { headers, status });
   };
@@ -14103,7 +14166,7 @@ var createHttpHandler = (mode) => {
     render: () => ""
   };
   const handler = async (req) => {
-    const server = prasi.server;
+    const server = prasi2.server;
     if (server && typeof server.http === "function") {
       const url = new URL(req.url);
       if (mode === "dev") {
@@ -14124,21 +14187,22 @@ var createHttpHandler = (mode) => {
   };
   return handler;
 };
-var head = (headers, name, set_value) => {
+var head = (headers, name, set2) => {
   if (!headers) {
-    if (typeof set_value === "string") {
-      return { [name]: set_value };
+    if (set2) {
+      set2[0]({ [name]: set2[1] });
     }
     return "";
   }
   if (headers instanceof Headers) {
-    if (typeof set_value === "string") {
-      headers.set(name, set_value);
+    if (set2) {
+      headers.set(name, set2[1]);
+      set2[0](headers);
     }
     return headers.get(name);
   }
-  if (typeof set_value === "string") {
-    headers[name] = set_value;
+  if (set2) {
+    set2[0]({ [name]: set2[1] });
   }
   return headers[name];
 };
@@ -14150,7 +14214,7 @@ var createWsHandler = () => {
 };
 
 // internal/main/init.ts
-var init2 = async ({
+var init3 = async ({
   site_id,
   server,
   mode,
@@ -14188,7 +14252,10 @@ var init2 = async ({
   if (mode === "vm") {
     const src = await Bun.file(backend_path).text();
     const script = new import_node_vm.Script(src, { filename: backend_path });
-    const ctx = { module: { exports: { server: null } } };
+    const ctx = {
+      module: { exports: { server: null } },
+      prasi_global: prasi
+    };
     const cjs = script.runInThisContext();
     cjs(ctx.module.exports, require, ctx.module);
     prasi.server = ctx.module.exports.server;
@@ -14214,7 +14281,7 @@ var init2 = async ({
     await prasi.server.init({ port: server_instance.port });
   }
   prasi.handler = {
-    http: createHttpHandler(mode === "vm" ? "dev" : "prod"),
+    http: await createHttpHandler(prasi, mode === "vm" ? "dev" : "prod"),
     ws: createWsHandler()
   };
 };

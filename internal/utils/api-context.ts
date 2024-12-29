@@ -1,5 +1,6 @@
 import mime from "mime";
 import { binaryExtensions } from "./binary-ext";
+import type { PrasiGlobal } from "main/prasi-var";
 export type ApiResponse = Promise<void | {
   body: any;
   headers: any;
@@ -27,8 +28,12 @@ export const apiContext = (ctx: any) => {
   }
 
   ctx.req.query_parameters = parseQueryParams(ctx);
+
   return {
     req: ctx.req as Request & { params: any; query_parameters: any },
+    params: ctx.params as Record<string, any>,
+    url: ctx.url as URL,
+    prasi: ctx.prasi as PrasiGlobal,
   };
 };
 
