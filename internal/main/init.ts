@@ -17,6 +17,7 @@ export const init = async ({
   prasi: init_prasi,
   action,
   handler,
+  dev,
 }: {
   site_id: string;
   prasi: {
@@ -38,6 +39,7 @@ export const init = async ({
   server: (server: PrasiServer) => Server;
   mode: "vm" | "server";
   action?: "reload" | "start";
+  dev?: boolean;
   handler: {
     pages: (ids: string[]) => Promise<Record<string, any>>;
   };
@@ -76,6 +78,7 @@ export const init = async ({
   };
   prasi.site_id = site_id;
 
+  prasi.dev = dev;
   if (mode === "vm") {
     const src = await Bun.file(backend_path).text();
     const script = new Script(src, { filename: backend_path });

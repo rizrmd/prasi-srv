@@ -1,29 +1,23 @@
 import { readFileSync } from "fs";
 import { prasi } from "main/prasi-var";
-import { join } from "path";
 import { parse } from "node-html-parser";
+import { join } from "path";
 
-export const route_index = {
-  _cache: "",
+const default_route = {
   _head: [] as string[],
+  _cached: false,
   handle(site_id: string, opt: { page_id?: string; params?: any }) {
-    if (!this._cache) {
-      this._cache = readFileSync(join(prasi.static.nova, "index.html"), {
+    if ((!this._cached && prasi.mode === "vm") || prasi.dev) {
+      this._cached = true;
+      const _cache = readFileSync(join(prasi.static.nova, "index.html"), {
         encoding: "utf-8",
       });
-      const html = parse(this._cache);
+      const html = parse(_cache);
       this._head = [
         ...html.querySelectorAll("script").map((e) => {
-          if (prasi.mode === "vm") {
-            e.setAttribute("src", `/prod/${site_id}${e.getAttribute("src")}`);
-          }
           return e.toString();
         }),
         ...html.querySelectorAll("link").map((e) => {
-          if (prasi.mode === "vm") {
-            e.setAttribute("href", `/prod/${site_id}${e.getAttribute("href")}`);
-          }
-
           return e.toString();
         }),
       ];
@@ -61,3 +55,5 @@ export const route_index = {
 </html>`;
   },
 };
+
+export const route_index = ((globalThis as any).route_index = default_route);

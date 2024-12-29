@@ -13990,28 +13990,23 @@ init_route_api();
 
 // internal/main/handler/route-index.ts
 var import_fs4 = require("fs");
-var import_path4 = require("path");
 var import_node_html_parser = __toESM(require_dist());
-var route_index = {
-  _cache: "",
+var import_path4 = require("path");
+var default_route = {
   _head: [],
+  _cached: false,
   handle(site_id, opt) {
-    if (!this._cache) {
-      this._cache = import_fs4.readFileSync(import_path4.join(prasi.static.nova, "index.html"), {
+    if (!this._cached && prasi.mode === "vm" || prasi.dev) {
+      this._cached = true;
+      const _cache = import_fs4.readFileSync(import_path4.join(prasi.static.nova, "index.html"), {
         encoding: "utf-8"
       });
-      const html = import_node_html_parser.parse(this._cache);
+      const html = import_node_html_parser.parse(_cache);
       this._head = [
         ...html.querySelectorAll("script").map((e) => {
-          if (prasi.mode === "vm") {
-            e.setAttribute("src", `/prod/${site_id}${e.getAttribute("src")}`);
-          }
           return e.toString();
         }),
         ...html.querySelectorAll("link").map((e) => {
-          if (prasi.mode === "vm") {
-            e.setAttribute("href", `/prod/${site_id}${e.getAttribute("href")}`);
-          }
           return e.toString();
         })
       ];
@@ -14044,6 +14039,7 @@ var route_index = {
 </html>`;
   }
 };
+var route_index = globalThis.route_index = default_route;
 
 // internal/main/handler/http-handler.ts
 var createHttpHandler = (server, mode) => {
@@ -14077,16 +14073,6 @@ var createHttpHandler = (server, mode) => {
       if (body === null && ![".js", ".css"].find((e) => url.pathname.endsWith(e))) {
         body = route_index.handle(prasi.site_id, {});
         headers = { "content-type": "text/html" };
-      }
-    }
-    if (typeof body === "object" && body) {
-      const file = body;
-      if (typeof file.type === "string" && typeof file.exists === "function") {
-        if (!headers && file.type.includes("octet")) {
-          headers = {
-            "content-type": "text/plain"
-          };
-        }
       }
     }
     if (opt?.rewrite) {
@@ -14136,7 +14122,8 @@ var init2 = async ({
   mode,
   prasi: init_prasi,
   action,
-  handler
+  handler,
+  dev
 }) => {
   prasi.mode = mode;
   const build_dir = init_prasi.paths.dir.build;
@@ -14162,6 +14149,7 @@ var init2 = async ({
     nova: init_prasi.paths.dir.nova
   };
   prasi.site_id = site_id;
+  prasi.dev = dev;
   if (mode === "vm") {
     const src = await Bun.file(backend_path).text();
     const script = new import_node_vm.Script(src, { filename: backend_path });

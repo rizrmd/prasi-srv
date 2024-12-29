@@ -20,6 +20,7 @@ export const prasi = (globalThis as any).prasi as unknown as {
     nova: string;
   };
   mode: "vm" | "server";
+  dev?: boolean;
   ext: {
     kv?: BunSqliteKeyValue;
     firebase?: {

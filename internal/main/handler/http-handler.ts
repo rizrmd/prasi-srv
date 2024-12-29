@@ -48,17 +48,6 @@ export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
       }
     }
 
-    if (typeof body === "object" && body) {
-      const file = body as BunFile;
-      if (typeof file.type === "string" && typeof file.exists === "function") {
-        if (!headers && file.type.includes("octet")) {
-          headers = {
-            "content-type": "text/plain",
-          };
-        }
-      }
-    }
-
     if (opt?.rewrite) {
       body = opt.rewrite({ body, headers });
     }

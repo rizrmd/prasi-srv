@@ -24,6 +24,9 @@ export interface PrasiServer {
     prasi: { page_id?: string; params?: Record<string, any> };
   }) => Promise<Response>;
   init?: (arg: { port?: number }) => Promise<void>;
+  cache?: {
+    nova: boolean;
+  };
 }
 
 export type ServerCtx = {
