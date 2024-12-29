@@ -52,6 +52,16 @@ export const createHttpHandler = (server: Server, mode: "dev" | "prod") => {
       body = opt.rewrite({ body, headers });
     }
 
+    if (
+      typeof body === "object" &&
+      body &&
+      !body.prototype &&
+      headers["content-type"] !== "application/json"
+    ) {
+      body = JSON.stringify(body);
+      headers["content-type"] = "application/json";
+    }
+
     return new Response(body, { headers, status });
   };
 

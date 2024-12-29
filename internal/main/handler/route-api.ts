@@ -15,14 +15,18 @@ export const route_api = {
   async init() {
     this._router = createRouter();
     const scan = async (path: string, root?: string) => {
-      const apis = await listAsync(path);
+      const base_dir = join(__dirname, "..", "..", "..", path);
+      const apis = await listAsync(base_dir);
       if (apis) {
         for (const filename of apis) {
-          const importPath = join(path, filename);
+          const importPath = join(base_dir, filename);
+
           if (filename.endsWith(".ts")) {
             try {
-              const api = await import(importPath);
+              delete require.cache[importPath];
+              const api = require(importPath);
               let args: string[] = await parseArgs(importPath);
+
               const route = {
                 url: api._.url,
                 args,
@@ -30,8 +34,10 @@ export const route_api = {
                 fn: api._.api,
                 path: importPath.substring((root || path).length + 1),
               };
-              if (this._router)
+
+              if (this._router) {
                 addRoute(this._router, undefined, route.url, route);
+              }
             } catch (e) {
               siteLog(
                 `Failed to import app/srv/api${importPath.substring(
@@ -80,13 +86,13 @@ export const route_api = {
           } catch (e) {}
         }
 
-        const res = await fn.bind({ req })(...arg_val);
+        const res = await fn.bind({ req, params })(...arg_val);
 
         if (typeof res.headers === "object" && res.headers) {
           if (res instanceof Response) {
             return res;
           }
-          
+
           if (
             res.headers["content-type"] === "application/json" &&
             typeof res.body === "object"

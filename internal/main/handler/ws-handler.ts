@@ -1,5 +1,5 @@
-import type { PrasiWsHandler } from "typings/server";
+import type { WebSocketHandler } from "bun";
 
-export const createWsHandler = () => {
-  return { message(ws, message) {} } as PrasiWsHandler;
+export const createWsHandler = (): WebSocketHandler<{ url: URL }> => {
+  return { message(ws, message) {} };
 };

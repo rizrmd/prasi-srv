@@ -1,6 +1,6 @@
-import { createPrismaSchemaBuilder, Field } from "@mrleebo/prisma-ast";
-import { get } from "utils/get";
-import { HasManyType } from "./types";
+import { createPrismaSchemaBuilder, type Field } from "@mrleebo/prisma-ast";
+import get from "lodash.get";
+import type { HasManyType } from "./types";
 
 export const createRelMany = (arg: {
   row: any;

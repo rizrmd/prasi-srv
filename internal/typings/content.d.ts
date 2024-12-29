@@ -1,12 +1,5 @@
 import type { ServerCtx } from "typings/server";
 
-export type PrasiContent = {
-  prepare: (site_id: string) => void | Promise<void>;
-  init: () => Promise<void>;
-  started: () => Promise<void>;
-  route: (ctx: ServerCtx) => Promise<Response | void>;
-};
-
 export type ILayout = {
   id: string;
   name: string;

@@ -6176,7 +6176,7 @@ var exports_route_api = {};
 __export(exports_route_api, {
   route_api: () => route_api
 });
-var import_fs_jetpack3, import_path3, route_api;
+var import_fs_jetpack3, import_path3, __dirname = "/Users/riz/Developer/data/site-srv/main/internal/main/handler", route_api;
 var init_route_api = __esm(() => {
   import_fs_jetpack3 = __toESM(require_main());
   import_path3 = require("path");
@@ -6188,13 +6188,15 @@ var init_route_api = __esm(() => {
     async init() {
       this._router = createRouter();
       const scan = async (path, root) => {
-        const apis = await import_fs_jetpack3.listAsync(path);
+        const base_dir = import_path3.join(__dirname, "..", "..", "..", path);
+        const apis = await import_fs_jetpack3.listAsync(base_dir);
         if (apis) {
           for (const filename of apis) {
-            const importPath = import_path3.join(path, filename);
+            const importPath = import_path3.join(base_dir, filename);
             if (filename.endsWith(".ts")) {
               try {
-                const api = await import(importPath);
+                delete require.cache[importPath];
+                const api = require(importPath);
                 let args = await parseArgs(importPath);
                 const route = {
                   url: api._.url,
@@ -6203,8 +6205,9 @@ var init_route_api = __esm(() => {
                   fn: api._.api,
                   path: importPath.substring((root || path).length + 1)
                 };
-                if (this._router)
+                if (this._router) {
                   addRoute(this._router, undefined, route.url, route);
+                }
               } catch (e) {
                 siteLog(`Failed to import app/srv/api${importPath.substring((root || path).length)}`);
                 const f = Bun.file(importPath);
@@ -6248,7 +6251,7 @@ var init_route_api = __esm(() => {
             } catch (e) {
             }
           }
-          const res = await fn.bind({ req })(...arg_val);
+          const res = await fn.bind({ req, params })(...arg_val);
           if (typeof res.headers === "object" && res.headers) {
             if (res instanceof Response) {
               return res;
@@ -11797,6 +11800,7 @@ __export(exports_init, {
   init: () => init2
 });
 module.exports = __toCommonJS(exports_init);
+var import_node_vm = require("vm");
 var import_path6 = require("path");
 init_color();
 
@@ -14078,6 +14082,10 @@ var createHttpHandler = (server, mode) => {
     if (opt?.rewrite) {
       body = opt.rewrite({ body, headers });
     }
+    if (typeof body === "object" && body && !body.prototype && headers["content-type"] !== "application/json") {
+      body = JSON.stringify(body);
+      headers["content-type"] = "application/json";
+    }
     return new Response(body, { headers, status });
   };
   const index = {
@@ -14115,17 +14123,17 @@ var createWsHandler = () => {
 };
 
 // internal/main/init.ts
-var import_node_vm = require("vm");
 var init2 = async ({
   site_id,
   server,
   mode,
   prasi: init_prasi,
   action,
-  handler,
+  content,
   dev
 }) => {
   prasi.mode = mode;
+  prasi.content = content;
   const build_dir = init_prasi.paths.dir.build;
   if (!build_dir) {
     console.error(`dir.build is empty, please check prasi.json!`);

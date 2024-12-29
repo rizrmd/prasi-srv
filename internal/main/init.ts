@@ -1,4 +1,5 @@
 import type { Server } from "bun";
+import { Script } from "node:vm";
 import { dirname, join } from "path";
 import type { PrasiServer } from "typings/server";
 import { c } from "utils/color";
@@ -7,8 +8,7 @@ import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
-import { prasi } from "./prasi-var";
-import { Script, runInThisContext } from "node:vm";
+import { prasi, type PrasiContent } from "./prasi-var";
 
 export const init = async ({
   site_id,
@@ -16,7 +16,7 @@ export const init = async ({
   mode,
   prasi: init_prasi,
   action,
-  handler,
+  content,
   dev,
 }: {
   site_id: string;
@@ -40,11 +40,10 @@ export const init = async ({
   mode: "vm" | "server";
   action?: "reload" | "start";
   dev?: boolean;
-  handler: {
-    pages: (ids: string[]) => Promise<Record<string, any>>;
-  };
+  content: PrasiContent;
 }) => {
   prasi.mode = mode;
+  prasi.content = content;
   const build_dir = init_prasi.paths.dir.build;
 
   if (!build_dir) {
@@ -77,8 +76,8 @@ export const init = async ({
     nova: init_prasi.paths.dir.nova,
   };
   prasi.site_id = site_id;
-
   prasi.dev = dev;
+
   if (mode === "vm") {
     const src = await Bun.file(backend_path).text();
     const script = new Script(src, { filename: backend_path });
