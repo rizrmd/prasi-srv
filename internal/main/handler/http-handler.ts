@@ -143,8 +143,6 @@ export const createHttpHandler = async (
     } else if ((compression = "zstd")) {
       head(result, "content-encoding", "zstd");
 
-      console.log("b", head(result, "content-type"));
-
       if (is_file) {
         const file = result.body as BunFile;
         head(result, "content-type", file.type);

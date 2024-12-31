@@ -14169,7 +14169,6 @@ var createHttpHandler = async (prasi2, mode) => {
       }
     } else if (compression = "zstd") {
       head(result, "content-encoding", "zstd");
-      console.log("b", head(result, "content-type"));
       if (is_file) {
         const file = result.body;
         head(result, "content-type", file.type);
