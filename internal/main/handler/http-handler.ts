@@ -141,8 +141,6 @@ export const createHttpHandler = async (
         result.body = Bun.gzipSync(result.body);
       }
     } else if ((compression = "zstd")) {
-      console.log("a", head(result, "content-type"), result.html);
-
       head(result, "content-encoding", "zstd");
 
       console.log("b", head(result, "content-type"));
