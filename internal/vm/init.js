@@ -14064,66 +14064,60 @@ var encoder = new TextEncoder;
 var createHttpHandler = async (prasi2, mode) => {
   await zstd2.init();
   const handle = async function(req, opt) {
-    let body = null;
-    let headers = undefined;
-    let status = 200;
-    const set_headers = (v) => {
-      if (!headers) {
-        headers = v;
-      }
-      if (headers instanceof Headers && v instanceof Headers) {
-      } else {
-        headers = { ...headers, ...v };
-      }
+    const result = {
+      body: null,
+      headers: undefined,
+      status: 200
     };
     const url = this.url;
     let is_file = false;
     if (url.pathname.startsWith("/nova")) {
       const nova_file = import_path5.join(prasi2.static.nova, url.pathname.substring(6));
       if (nova_file) {
-        body = Bun.file(nova_file);
+        result.body = Bun.file(nova_file);
         is_file = true;
       }
     } else {
       const frontend_file = prasi2.static.frontend.exists(url.pathname);
       if (frontend_file) {
-        body = Bun.file(frontend_file.data.fullpath);
+        result.body = Bun.file(frontend_file.data.fullpath);
         is_file = true;
       } else {
         const public_file = prasi2.static.public.exists(url.pathname);
         if (public_file) {
-          body = Bun.file(public_file.data.fullpath);
+          result.body = Bun.file(public_file.data.fullpath);
           is_file = true;
         } else {
           const api = await route_api.handle(this.url, req, prasi2);
           if (api) {
-            body = api.body;
-            headers = api.headers;
-            status = api.status;
+            result.body = api.body;
+            result.headers = api.headers;
+            result.status = api.status;
           }
         }
       }
-      if (body === null && ![".js", ".css"].find((e) => url.pathname.endsWith(e))) {
-        body = route_index.handle(prasi2.site_id, url.pathname);
-        let new_headers = {};
-        head(headers || new_headers, "content-type", [
-          set_headers,
-          "text/html"
-        ]);
-        if (!headers) {
-          headers = new_headers;
-        }
+    }
+    if (typeof result.body === "object" && result.body && !is_file) {
+      result.body = JSON.stringify(result.body);
+      head(result, "content-type", "application/json");
+    }
+    if (result.body === null) {
+      result.body = route_index.handle(prasi2.site_id, url.pathname);
+      head(result, "content-type", "text/html");
+    }
+    if (!head(result, "content-type") && typeof url.pathname === "string") {
+      const ext = url.pathname.split(".").pop() || "";
+      if (ext.length >= 2 && ext.length <= 4) {
+        const type = src_default.getType(url.pathname);
+        if (type)
+          head(result, "content-type", type);
       }
     }
-    if (typeof body === "object" && body && !is_file) {
-      body = JSON.stringify(body);
-      head(headers, "content-type", [set_headers, "application/json"]);
-    }
     if (opt?.rewrite) {
-      body = opt.rewrite({ body, headers });
+      result.body = opt.rewrite(result);
     }
     const accept = req.headers.get("accept-encoding");
-    if (accept && !head(headers, "content-encoding")) {
+    if (accept && !head(result, "content-encoding")) {
       let compression = "";
       if (accept.includes("zstd")) {
         compression = "zstd";
@@ -14133,41 +14127,58 @@ var createHttpHandler = async (prasi2, mode) => {
       if (compression) {
         let should_compress = true;
         if (is_file) {
-          const file = body;
-          if (!headers) {
-            headers = { "content-type": body.type };
-          }
+          const file = result.body;
           if (file.size === 0) {
             should_compress = false;
           }
+        } else if (!result.body) {
+          should_compress = false;
         }
         if (should_compress) {
-          if (compression === "gzip") {
-            head(headers, "content-encoding", [set_headers, "gzip"]);
-            if (is_file) {
-              const file = body;
-              body = Bun.gzipSync(await file.arrayBuffer());
-            } else {
-              body = Bun.gzipSync(body);
-            }
-          } else if (compression = "zstd") {
-            head(headers, "content-encoding", [set_headers, "zstd"]);
-            if (is_file) {
-              const file = body;
-              body = zstd2.compress(new Uint8Array(await file.arrayBuffer()), 10);
-            } else {
-              body = zstd2.compress(encoder.encode(body), 10);
-            }
-          }
+          await compress3({
+            result,
+            is_file,
+            compression
+          });
         }
       }
     }
-    return new Response(body, { headers, status });
+    return new Response(result.body, {
+      headers: result.headers,
+      status: result.status
+    });
   };
   const index = {
     head: [],
     body: [],
     render: () => ""
+  };
+  const compress3 = async ({
+    result,
+    is_file,
+    compression
+  }) => {
+    if (compression === "gzip") {
+      head(result, "content-encoding", "gzip");
+      if (is_file) {
+        const file = result.body;
+        head(result, "content-type", file.type);
+        result.body = Bun.gzipSync(await file.arrayBuffer());
+      } else {
+        result.body = Bun.gzipSync(result.body);
+      }
+    } else if (compression = "zstd") {
+      console.log("a", head(result, "content-type"), result.html);
+      head(result, "content-encoding", "zstd");
+      console.log("b", head(result, "content-type"));
+      if (is_file) {
+        const file = result.body;
+        head(result, "content-type", file.type);
+        result.body = zstd2.compress(new Uint8Array(await file.arrayBuffer()), 10);
+      } else {
+        result.body = zstd2.compress(encoder.encode(result.body), 10);
+      }
+    }
   };
   const handler = async (req) => {
     const server = prasi2.server;
@@ -14191,24 +14202,23 @@ var createHttpHandler = async (prasi2, mode) => {
   };
   return handler;
 };
-var head = (headers, name, set2) => {
-  if (!headers) {
-    if (set2) {
-      set2[0]({ [name]: set2[1] });
+var head = (result, name, set_value) => {
+  if (!result.headers) {
+    if (typeof set_value === "string") {
+      result.headers = { [name]: set_value };
     }
-    return "";
+    return set_value || "";
   }
-  if (headers instanceof Headers) {
-    if (set2) {
-      headers.set(name, set2[1]);
-      set2[0](headers);
+  if (result.headers instanceof Headers) {
+    if (typeof set_value === "string") {
+      result.headers.set(name, set_value);
     }
-    return headers.get(name);
+    return result.headers.get(name);
   }
-  if (set2) {
-    set2[0]({ [name]: set2[1] });
+  if (typeof set_value === "string") {
+    result.headers[name] = set_value;
   }
-  return headers[name];
+  return result.headers[name];
 };
 
 // internal/main/handler/ws-handler.ts

@@ -86,6 +86,7 @@ export const init = async ({
       module: { exports: { server: null as any } },
       prasi_global: prasi,
     };
+
     const cjs = script.runInThisContext();
     cjs(ctx.module.exports, require, ctx.module);
     prasi.server = ctx.module.exports.server;
@@ -94,6 +95,7 @@ export const init = async ({
     const module = require(backend_path);
     prasi.server = module.server;
   }
+
   process.chdir(
     join(init_prasi.paths.dir.build, dirname(init_prasi.paths.server))
   );
