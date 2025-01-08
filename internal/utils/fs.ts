@@ -17,7 +17,7 @@ export const fs = {
     const prefix_path = all_prefix[prefix_key!];
 
     if (prefix_key && prefix_path) {
-      return `${prefix_path}/${path.substring(prefix_key.length + 1)}`;
+      return join(prefix_path, path.substring(prefix_key.length + 1));
     }
     return path;
   },

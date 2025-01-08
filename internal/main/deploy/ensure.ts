@@ -1,4 +1,4 @@
-import { config } from "utils/config";
+import { config } from "utils/deploy-config";
 import { fs } from "utils/fs";
 import { downloadDeployedSite } from "./download";
 

@@ -3,12 +3,13 @@ import { Script } from "node:vm";
 import { dirname, join } from "path";
 import type { PrasiServer } from "typings/server";
 import { c } from "utils/color";
-import { initConfig } from "utils/config";
+import { initDeployConfig, type SiteConfig } from "utils/deploy-config";
 import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi, type PrasiContent } from "./prasi-var";
+import { initDB } from "../db/init-db";
 
 export const init = async ({
   site_id,
@@ -18,8 +19,10 @@ export const init = async ({
   action,
   content,
   dev,
+  db,
 }: {
   site_id: string;
+  db: SiteConfig["db"];
   prasi: {
     version: number;
     paths: {
@@ -58,15 +61,16 @@ export const init = async ({
   );
   const frontend_dir = dirname(join(build_dir, init_prasi.paths.index));
 
-  fs.init({
-    site: init_prasi.paths.dir.site,
-    upload: init_prasi.paths.dir.upload,
-    public: init_prasi.paths.dir.public,
-  });
-
   if (mode === "server") {
-    await initConfig();
+  } else {
+    fs.init({
+      site: init_prasi.paths.dir.build,
+      upload: init_prasi.paths.dir.upload,
+      public: init_prasi.paths.dir.public,
+    });
   }
+
+  await initDB(db);
 
   const { route_api: api_route } = await import("./handler/route-api");
   await api_route.init();
@@ -81,15 +85,14 @@ export const init = async ({
 
   if (mode === "vm") {
     const src = await Bun.file(backend_path).text();
-    const script = new Script(src, { filename: backend_path });
-    const ctx = {
-      module: { exports: { server: null as any } },
-      prasi_global: prasi,
-    };
+    const glb = global as any;
 
-    const cjs = script.runInThisContext();
-    cjs(ctx.module.exports, require, ctx.module);
-    prasi.server = ctx.module.exports.server;
+    const script = new Script(src, { filename: backend_path });
+    const module = { exports: { server: null as any } };
+
+    const cjs = script.runInContext(glb);
+    cjs(exports, require, module);
+    prasi.server = module.exports.server;
   } else {
     delete require.cache[backend_path];
     const module = require(backend_path);

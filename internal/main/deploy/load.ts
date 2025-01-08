@@ -2,7 +2,7 @@ import { gunzipSync } from "bun";
 import { removeAsync } from "fs-jetpack";
 import get from "lodash.get";
 import { decode } from "msgpackr";
-import { config } from "utils/config";
+import { config } from "utils/deploy-config";
 import { fs } from "utils/fs";
 import { prasi } from "../prasi-var";
 

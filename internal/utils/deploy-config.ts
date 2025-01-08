@@ -3,7 +3,7 @@ import get from "lodash.get";
 import set from "lodash.set";
 import { fs } from "./fs";
 
-export const initConfig = async () => {
+export const initDeployConfig = async () => {
   if (Object.keys(gconf.prasi_config).length === 0) {
     gconf.prasi_config = { ...default_config };
   }

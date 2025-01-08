@@ -4,7 +4,7 @@ import type { Database } from "bun:sqlite";
 import type { initializeApp } from "firebase-admin";
 import type { IPage } from "typings/content";
 import type { PrasiServer } from "typings/server";
-import { type SiteConfig } from "utils/config";
+import { type SiteConfig } from "utils/deploy-config";
 import type { StaticFile } from "utils/static";
 
 if (!(globalThis as any).prasi) {
