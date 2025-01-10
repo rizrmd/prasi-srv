@@ -50,7 +50,7 @@ export const prasi = (globalThis as any).prasi as unknown as {
     http: (req: Request) => Promise<Response>;
     ws: WebSocketHandler<{ url: URL }>;
   };
-  content: PrasiContent;
+  content?: Partial<PrasiContent>;
   deployed?: {
     db?: SiteConfig["db"];
     layouts: {

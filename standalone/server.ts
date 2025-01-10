@@ -1,0 +1,57 @@
+import { init } from "main/init";
+import { prasi } from "main/prasi-var";
+import { join } from "path";
+import { initBuild } from "./build/init";
+
+const prisma_path = join(process.cwd(), "node_modules/.prisma/client/index.js");
+const { PrismaClient } = require(prisma_path);
+
+initBuild()
+
+await init({
+  mode: "server",
+  db: new PrismaClient(),
+  prasi: {
+    version: 5,
+    paths: {
+      index: "index.tsx",
+      server: "server.ts",
+      internal: "internal.tsx",
+      typings: "",
+      dir: {
+        backend: "backend",
+        frontend: "frontend",
+        nova: "",
+        public: "public",
+        site: "",
+        upload: "upload",
+      },
+    },
+  },
+  server: () => {
+    return Bun.serve({
+      websocket: prasi.handler.ws,
+      fetch: async (req) => {
+        return await prasi.handler.http(req);
+      },
+      port: 3000,
+    });
+  },
+  content: {
+    async all_routes() {
+      return {
+        layout: {
+          id: "default",
+          root: {
+            id: "root",
+            name: "root",
+            url: "/",
+            content_tree: {},
+          },
+        },
+        site: { id: "default", api_url: "" },
+        urls: [{ id: "default", url: "/" }],
+      };
+    },
+  },
+});

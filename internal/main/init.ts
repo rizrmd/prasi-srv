@@ -19,7 +19,7 @@ export const init = async ({
   dev,
   db,
 }: {
-  site_id: string;
+  site_id?: string;
   db: SiteConfig["db"];
   prasi: {
     version: number;
@@ -42,10 +42,11 @@ export const init = async ({
   mode: "ipc" | "server";
   action?: "reload" | "start" | "init";
   dev?: boolean;
-  content: PrasiContent;
+  content?: Partial<PrasiContent>;
 }) => {
   prasi.mode = mode;
-  prasi.content = content;
+
+  if (content) prasi.content = content;
 
   const backend_path = init_prasi.paths.dir.backend;
   const frontend_dir = init_prasi.paths.dir.frontend;
@@ -74,11 +75,12 @@ export const init = async ({
     public: await staticFile(init_prasi.paths.dir.public),
     nova: init_prasi.paths.dir.nova,
   };
-  prasi.site_id = site_id;
+  if (site_id) prasi.site_id = site_id;
   prasi.dev = dev;
 
   if (mode === "ipc") {
     if (action === "init") return;
+    process.chdir(backend_path);
   }
 
   const backend_file = join(
@@ -88,8 +90,6 @@ export const init = async ({
   delete require.cache[backend_file];
   const module = require(backend_file);
   prasi.server = module.server;
-
-  process.chdir(backend_path);
 
   prasi.ext = {};
 
@@ -103,19 +103,19 @@ export const init = async ({
     };
   }
 
-  const server_instance = server(prasi.server);
-  console.log(
-    `${c.magenta}[SITE]${c.esc} ${site_id} ${
-      action === "reload" ? "Reloaded" : "Started"
-    }.`
-  );
-  if (prasi.server?.init) {
-    await prasi.server.init({ port: server_instance.port });
-  }
-
   prasi.handler = {
     http: await createHttpHandler(prasi, mode === "ipc" ? "dev" : "prod"),
     ws: createWsHandler(),
   };
+
+  const server_instance = server(prasi.server);
+  console.log(
+    `${c.magenta}[SITE]${c.esc} ${c.green}${c.underline}${
+      site_id || `http://localhost:${server_instance.port}`
+    }${c.esc} ${action === "reload" ? "Reloaded" : "Started"}.`
+  );
+  if (prasi.server?.init) {
+    await prasi.server.init({ port: server_instance.port });
+  }
   return prasi;
 };
