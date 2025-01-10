@@ -2,15 +2,24 @@ import { init } from "main/init";
 import { prasi } from "main/prasi-var";
 import { join } from "path";
 import { initBuild } from "./build/init";
+import { existsSync } from "fs";
 
-const prisma_path = join(process.cwd(), "node_modules/.prisma/client/index.js");
-const { PrismaClient } = require(prisma_path);
+let db = null as any;
+if (existsSync(join(process.cwd(), "backend", ".env"))) {
+  const prisma_path = join(
+    process.cwd(),
+    "node_modules/.prisma/client/index.js"
+  );
 
-initBuild()
+  const { PrismaClient } = require(prisma_path);
+  db = new PrismaClient();
+}
+
+initBuild();
 
 await init({
   mode: "server",
-  db: new PrismaClient(),
+  db,
   prasi: {
     version: 5,
     paths: {

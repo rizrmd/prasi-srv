@@ -3,7 +3,7 @@ import { ensurePrismaReady } from "./ensure-prisma";
 import { fs } from "utils/fs";
 
 export const initDB = async (db: SiteConfig["db"]) => {
-  if (db.orm === "prisma") {
+  if (db && db.orm === "prisma") {
     if (db.url) {
       try {
         await ensurePrismaReady(db);
