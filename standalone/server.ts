@@ -5,14 +5,18 @@ import { initBuild } from "./build/init";
 import { existsSync } from "fs";
 
 let db = null as any;
-if (existsSync(join(process.cwd(), "backend", ".env"))) {
-  const prisma_path = join(
-    process.cwd(),
-    "node_modules/.prisma/client/index.js"
-  );
+const env_file = join(process.cwd(), "backend", ".env");
+if (existsSync(env_file)) {
+  const env_content = require("fs").readFileSync(env_file, "utf-8");
+  if (env_content.includes("DATABASE_URL=")) {
+    const prisma_path = join(
+      process.cwd(),
+      "node_modules/.prisma/client/index.js"
+    );
 
-  const { PrismaClient } = require(prisma_path);
-  db = new PrismaClient();
+    const { PrismaClient } = require(prisma_path);
+    db = new PrismaClient();
+  }
 }
 
 initBuild();
@@ -61,6 +65,12 @@ await init({
         },
         site: { id: "default", api_url: "" },
         urls: [{ id: "default", url: "/" }],
+      };
+    },
+    route(pathname: string) {
+      return {
+        params: {},
+        data: { page_id: "" },
       };
     },
   },
