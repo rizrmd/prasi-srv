@@ -33,7 +33,7 @@ export const prasi = (globalThis as any).prasi as unknown as {
     public: StaticFile;
     nova: string;
   };
-  mode: "vm" | "server";
+  mode: "ipc" | "server";
   dev?: boolean;
   ext: {
     kv?: BunSqliteKeyValue;

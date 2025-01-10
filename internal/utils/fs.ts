@@ -1,5 +1,5 @@
 import { mkdirSync, statSync } from "fs";
-import { copyAsync } from "fs-jetpack";
+import { copyAsync, writeAsync } from "fs-jetpack";
 import { dirname, join } from "path";
 const internal = Symbol("internal");
 
@@ -63,16 +63,10 @@ export const fs = {
       mode?: "json" | "raw";
     }
   ) {
-    const file = Bun.file(this.path(path));
     if (typeof data === "object" && opt?.mode !== "raw") {
-      return await Bun.write(file, JSON.stringify(data, null, 2), {
-        createPath: true,
-      });
+      await writeAsync(this.path(path), JSON.stringify(data, null, 2));
     }
-
-    return await Bun.write(file, data, {
-      createPath: true,
-    });
+    await writeAsync(this.path(path), data);
   },
   init(paths: { site: string; upload: string; public: string }) {
     this[internal].prefix.site = paths.site;

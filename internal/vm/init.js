@@ -4353,7 +4353,7 @@ var require_wasm = __commonJS((exports2, module2) => {
   var imports = {};
   imports["__wbindgen_placeholder__"] = module2.exports;
   var wasm;
-  var { TextEncoder: TextEncoder2, TextDecoder } = require("util");
+  var { TextEncoder: TextEncoder2, TextDecoder: TextDecoder2 } = require("util");
   var heap = new Array(128).fill(undefined);
   heap.push(undefined, null, true, false);
   function getObject(idx) {
@@ -4431,7 +4431,7 @@ var require_wasm = __commonJS((exports2, module2) => {
     }
     return cachedDataViewMemory0;
   }
-  var cachedTextDecoder = new TextDecoder("utf-8", { ignoreBOM: true, fatal: true });
+  var cachedTextDecoder = new TextDecoder2("utf-8", { ignoreBOM: true, fatal: true });
   cachedTextDecoder.decode();
   function getStringFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
@@ -5553,9 +5553,9 @@ var exports_route_api = {};
 __export(exports_route_api, {
   route_api: () => route_api
 });
-var import_fs_jetpack3, import_path3, __dirname = "/Users/riz/Developer/data/site-srv/main/internal/main/handler", route_api;
+var import_fs_jetpack4, import_path3, __dirname = "/Users/riz/Developer/data/site-srv/main/internal/main/handler", route_api;
 var init_route_api = __esm(() => {
-  import_fs_jetpack3 = __toESM(require_main());
+  import_fs_jetpack4 = __toESM(require_main());
   import_path3 = require("path");
   init_dist();
   init_log();
@@ -5566,7 +5566,7 @@ var init_route_api = __esm(() => {
       this._router = createRouter();
       const scan = async (path, root) => {
         const base_dir = import_path3.join(__dirname, "..", "..", "..", path);
-        const apis = await import_fs_jetpack3.listAsync(base_dir);
+        const apis = await import_fs_jetpack4.listAsync(base_dir);
         if (apis) {
           for (const filename of apis) {
             const importPath = import_path3.join(base_dir, filename);
@@ -5595,7 +5595,7 @@ var init_route_api = __esm(() => {
                 }
               }
             } else {
-              const dir = await import_fs_jetpack3.inspectAsync(importPath);
+              const dir = await import_fs_jetpack4.inspectAsync(importPath);
               if (dir?.type === "dir") {
                 await scan(importPath, path);
               }
@@ -11182,8 +11182,6 @@ __export(exports_init, {
   init: () => init3
 });
 module.exports = __toCommonJS(exports_init);
-var import_node_vm = require("vm");
-var import_path6 = require("path");
 init_color();
 
 // internal/utils/fs.ts
@@ -11237,15 +11235,10 @@ var fs = {
     return await file.text();
   },
   async write(path, data, opt) {
-    const file = Bun.file(this.path(path));
     if (typeof data === "object" && opt?.mode !== "raw") {
-      return await Bun.write(file, JSON.stringify(data, null, 2), {
-        createPath: true
-      });
+      await import_fs_jetpack.writeAsync(this.path(path), JSON.stringify(data, null, 2));
     }
-    return await Bun.write(file, data, {
-      createPath: true
-    });
+    await import_fs_jetpack.writeAsync(this.path(path), data);
   },
   init(paths) {
     this[internal].prefix.site = paths.site;
@@ -13317,12 +13310,69 @@ var cachedResponse = (ctx, file_path, mime, store) => {
   return { content, headers };
 };
 
+// internal/db/ensure-prisma.ts
+var import_fs_jetpack3 = __toESM(require_main());
+init_color();
+init_log();
+var ensurePrismaReady = async (config) => {
+  if (config.orm !== "prisma") {
+    dbLog("Warning: Current DB ORM is not prisma, but forced to use prisma");
+    return;
+  }
+  const $ = Bun.$;
+  const db = config;
+  if (db.orm === "prisma") {
+    const cwd = fs.path(`site:app/db`);
+    const url = new URL(db.url);
+    const host = `[${c.blue}${url.hostname}${c.esc}]`;
+    const db_type = `[${c.red}${url.protocol.slice(0, -1).toUpperCase()}${c.esc}]`;
+    process.env.DATABASE_URL = db.url;
+    if (!fs.exists("site:app/db")) {
+      dbLog(`Preparing PrismaDB ${db_type} on ${host} ${url.pathname}`);
+      await import_fs_jetpack3.removeAsync(cwd);
+      await import_fs_jetpack3.dirAsync(cwd);
+      await $`bun init .`.cwd(cwd).quiet();
+      await $`bun add prisma`.cwd(cwd).quiet();
+      await $`bun prisma init`.cwd(cwd).quiet();
+      dbLog(`PrismaDB created at ${cwd}`);
+      await fs.write(`site:app/db/.env`, `DATABASE_URL=${db.url}`);
+      await $`bun prisma db pull`.cwd(cwd).quiet().env({ DATABASE_URL: db.url });
+      dbLog(`PrismaDB instrospected (db pull)`);
+      await $`bun prisma generate`.cwd(cwd).quiet().env({ DATABASE_URL: db.url });
+      dbLog(`PrismaDB ready`);
+      await fs.write(`site:app/db/index.ts`, `import { PrismaClient } from "@prisma/client/extension";
+export const db = new PrismaClient();
+`);
+    } else {
+      await $`bun prisma generate`.cwd(cwd).quiet();
+      dbLog(`PrismaDB Ready: ${db_type} on ${host} ${url.pathname}`);
+    }
+  }
+};
+
+// internal/db/init-db.ts
+var initDB = async (db) => {
+  if (db.orm === "prisma") {
+    if (db.url) {
+      try {
+        await ensurePrismaReady(db);
+      } catch (e) {
+        if (e && e.stderr instanceof Buffer) {
+          console.error(new TextDecoder().decode(e.stderr));
+        } else {
+          console.error(e);
+        }
+      }
+    }
+  }
+};
+
 // internal/main/handler/http-handler.ts
 var import_path5 = require("path");
 init_route_api();
 
 // internal/main/handler/route-index.ts
-var import_fs2 = require("fs");
+var import_fs3 = require("fs");
 var import_node_html_parser = __toESM(require_dist());
 var import_path4 = require("path");
 var default_route = {
@@ -13331,7 +13381,7 @@ var default_route = {
   handle(site_id, pathname) {
     if (!this._cached && prasi.mode === "vm" || prasi.dev) {
       this._cached = true;
-      const _cache = import_fs2.readFileSync(import_path4.join(prasi.static.nova, "index.html"), {
+      const _cache = import_fs3.readFileSync(import_path4.join(prasi.static.nova, "index.html"), {
         encoding: "utf-8"
       });
       const html = import_node_html_parser.parse(_cache);
@@ -13549,54 +13599,6 @@ var createWsHandler = () => {
   } };
 };
 
-// internal/db/ensure-prisma.ts
-var import_fs_jetpack4 = __toESM(require_main());
-init_color();
-init_log();
-var ensurePrismaReady = async (config) => {
-  if (config.orm !== "prisma") {
-    dbLog("Warning: Current DB ORM is not prisma, but forced to use prisma");
-    return;
-  }
-  const $ = Bun.$;
-  const db = config;
-  if (db.orm === "prisma") {
-    const cwd = fs.path(`site:app/db`);
-    const url = new URL(db.url);
-    const host = `[${c.blue}${url.hostname}${c.esc}]`;
-    const db_type = `[${c.red}${url.protocol.slice(0, -1).toUpperCase()}${c.esc}]`;
-    if (!fs.exists("site:app/db")) {
-      dbLog(`Preparing PrismaDB ${db_type} on ${host} ${url.pathname}`);
-      await import_fs_jetpack4.removeAsync(cwd);
-      await import_fs_jetpack4.dirAsync(cwd);
-      await $`bun init .`.cwd(cwd).quiet();
-      await $`bun add prisma`.cwd(cwd).quiet();
-      await $`bun prisma init`.cwd(cwd).quiet();
-      dbLog(`PrismaDB created at ${cwd}`);
-      fs.write(`site:app/db/.env`, `DATABASE_URL=${db.url}`);
-      await $`bun prisma db pull`.cwd(cwd).quiet();
-      dbLog(`PrismaDB instrospected (db pull)`);
-      await $`bun prisma generate`.cwd(cwd).quiet();
-      dbLog(`PrismaDB ready`);
-      await fs.write(`site:app/db/index.ts`, `import { PrismaClient } from "@prisma/client/extension";
-export const db = new PrismaClient();
-`);
-    } else {
-      await $`bun prisma generate`.cwd(cwd).quiet();
-      dbLog(`PrismaDB Ready: ${db_type} on ${host} ${url.pathname}`);
-    }
-  }
-};
-
-// internal/db/init-db.ts
-var initDB = async (db) => {
-  if (db.orm === "prisma") {
-    if (db.url) {
-      await ensurePrismaReady(db);
-    }
-  }
-};
-
 // internal/main/init.ts
 var init3 = async ({
   site_id,
@@ -13610,17 +13612,16 @@ var init3 = async ({
 }) => {
   prasi.mode = mode;
   prasi.content = content;
-  const build_dir = init_prasi.paths.dir.build;
-  if (!build_dir) {
+  const backend_path = init_prasi.paths.dir.backend;
+  const frontend_dir = init_prasi.paths.dir.frontend;
+  if (!frontend_dir) {
     console.error(`dir.build is empty, please check prasi.json!`);
     return;
   }
-  const backend_path = import_path6.join(build_dir, init_prasi.paths.server.replace(".ts", ".js"));
-  const frontend_dir = import_path6.dirname(import_path6.join(build_dir, init_prasi.paths.index));
   if (mode === "server") {
   } else {
     fs.init({
-      site: init_prasi.paths.dir.build,
+      site: init_prasi.paths.dir.backend,
       upload: init_prasi.paths.dir.upload,
       public: init_prasi.paths.dir.public
     });
@@ -13635,20 +13636,15 @@ var init3 = async ({
   };
   prasi.site_id = site_id;
   prasi.dev = dev;
-  if (mode === "vm") {
-    const src = await Bun.file(backend_path).text();
-    const glb = global;
-    const script = new import_node_vm.Script(src, { filename: backend_path });
-    const module2 = { exports: { server: null } };
-    const cjs = script.runInContext(glb);
-    cjs(exports_init, require, module2);
-    prasi.server = module2.exports.server;
+  if (mode === "ipc") {
+    if (action === "init")
+      return;
   } else {
     delete require.cache[backend_path];
     const module2 = require(backend_path);
     prasi.server = module2.server;
   }
-  process.chdir(import_path6.join(init_prasi.paths.dir.build, import_path6.dirname(init_prasi.paths.server)));
+  process.chdir(backend_path);
   prasi.ext = {};
   if (!prasi.server) {
     prasi.server = {
@@ -13665,7 +13661,7 @@ var init3 = async ({
     await prasi.server.init({ port: server_instance.port });
   }
   prasi.handler = {
-    http: await createHttpHandler(prasi, mode === "vm" ? "dev" : "prod"),
+    http: await createHttpHandler(prasi, mode === "ipc" ? "dev" : "prod"),
     ws: createWsHandler()
   };
 };

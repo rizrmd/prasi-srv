@@ -1,15 +1,13 @@
 import type { Server } from "bun";
-import { Script } from "node:vm";
-import { dirname, join } from "path";
 import type { PrasiServer } from "typings/server";
 import { c } from "utils/color";
-import { initDeployConfig, type SiteConfig } from "utils/deploy-config";
+import { type SiteConfig } from "utils/deploy-config";
 import { fs } from "utils/fs";
 import { staticFile } from "utils/static";
+import { initDB } from "../db/init-db";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi, type PrasiContent } from "./prasi-var";
-import { initDB } from "../db/init-db";
 
 export const init = async ({
   site_id,
@@ -33,38 +31,34 @@ export const init = async ({
       dir: {
         nova: string;
         site: string;
-        build: string;
+        frontend: string;
+        backend: string;
         upload: string;
         public: string;
       };
     };
   };
   server: (server: PrasiServer) => Server;
-  mode: "vm" | "server";
-  action?: "reload" | "start";
+  mode: "ipc" | "server";
+  action?: "reload" | "start" | "init";
   dev?: boolean;
   content: PrasiContent;
 }) => {
   prasi.mode = mode;
   prasi.content = content;
 
-  const build_dir = init_prasi.paths.dir.build;
+  const backend_path = init_prasi.paths.dir.backend;
+  const frontend_dir = init_prasi.paths.dir.frontend;
 
-  if (!build_dir) {
+  if (!frontend_dir) {
     console.error(`dir.build is empty, please check prasi.json!`);
     return;
   }
 
-  const backend_path = join(
-    build_dir,
-    init_prasi.paths.server.replace(".ts", ".js")
-  );
-  const frontend_dir = dirname(join(build_dir, init_prasi.paths.index));
-
   if (mode === "server") {
   } else {
     fs.init({
-      site: init_prasi.paths.dir.build,
+      site: init_prasi.paths.dir.backend,
       upload: init_prasi.paths.dir.upload,
       public: init_prasi.paths.dir.public,
     });
@@ -81,27 +75,31 @@ export const init = async ({
     nova: init_prasi.paths.dir.nova,
   };
   prasi.site_id = site_id;
-  prasi.dev = dev;
+  prasi.dev = dev; 
 
-  if (mode === "vm") {
-    const src = await Bun.file(backend_path).text();
-    const glb = global as any;
+  if (mode === "ipc") {
+    if (action === "init") return;
 
-    const script = new Script(src, { filename: backend_path });
-    const module = { exports: { server: null as any } };
+    // const vm_path = join(
+    //   backend_path,
+    //   basename(init_prasi.paths.server).replace(".ts", ".js")
+    // );
+    // const src = await Bun.file(vm_path).text();
+    // const glb = global as any;
 
-    const cjs = script.runInContext(glb);
-    cjs(exports, require, module);
-    prasi.server = module.exports.server;
+    // const script = new Script(src, { filename: vm_path });
+    // const module = { exports: { server: null as any } };
+
+    // const cjs = script.runInContext(glb);
+    // cjs(exports, require, module);
+    // prasi.server = module.exports.server;
   } else {
     delete require.cache[backend_path];
     const module = require(backend_path);
     prasi.server = module.server;
   }
 
-  process.chdir(
-    join(init_prasi.paths.dir.build, dirname(init_prasi.paths.server))
-  );
+  process.chdir(backend_path);
 
   prasi.ext = {};
 
@@ -127,7 +125,7 @@ export const init = async ({
   }
 
   prasi.handler = {
-    http: await createHttpHandler(prasi, mode === "vm" ? "dev" : "prod"),
+    http: await createHttpHandler(prasi, mode === "ipc" ? "dev" : "prod"),
     ws: createWsHandler(),
   };
 };

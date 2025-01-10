@@ -21,6 +21,7 @@ export const ensurePrismaReady = async (config: SiteConfig["db"]) => {
       c.esc
     }]`;
 
+    process.env.DATABASE_URL = db.url;
     if (!fs.exists("site:app/db")) {
       dbLog(`Preparing PrismaDB ${db_type} on ${host} ${url.pathname}`);
       await removeAsync(cwd);
@@ -31,12 +32,18 @@ export const ensurePrismaReady = async (config: SiteConfig["db"]) => {
       await $`bun prisma init`.cwd(cwd).quiet();
 
       dbLog(`PrismaDB created at ${cwd}`);
-      fs.write(`site:app/db/.env`, `DATABASE_URL=${db.url}`);
+      await fs.write(`site:app/db/.env`, `DATABASE_URL=${db.url}`);
 
-      await $`bun prisma db pull`.cwd(cwd).quiet();
+      await $`bun prisma db pull`
+        .cwd(cwd)
+        .quiet()
+        .env({ DATABASE_URL: db.url });
       dbLog(`PrismaDB instrospected (db pull)`);
 
-      await $`bun prisma generate`.cwd(cwd).quiet();
+      await $`bun prisma generate`
+        .cwd(cwd)
+        .quiet()
+        .env({ DATABASE_URL: db.url });
       dbLog(`PrismaDB ready`);
 
       await fs.write(
