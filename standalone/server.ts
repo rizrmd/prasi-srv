@@ -38,6 +38,7 @@ await init({
     },
   },
   server: () => {
+    console.clear();
     return Bun.serve({
       websocket: prasi.handler.ws,
       fetch: async (req) => {
