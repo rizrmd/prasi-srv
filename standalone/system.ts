@@ -1,7 +1,7 @@
 export default {
   init: (port?: number) => {},
   router: {
-    handle: (req: Request) => {
+    serve: (req: Request) => {
       const found = undefined as undefined | Response;
       return found;
     }
