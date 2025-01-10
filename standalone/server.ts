@@ -67,11 +67,5 @@ await init({
         urls: [{ id: "default", url: "/" }],
       };
     },
-    route(pathname: string) {
-      return {
-        params: {},
-        data: { page_id: "" },
-      };
-    },
   },
 });
