@@ -17,6 +17,7 @@ export const _ = {
 
       case "load.js":
     }
+    
     if (action === "route") {
       return json(await prasi.content.all_routes());
     }

@@ -8,7 +8,7 @@ import { initDB } from "../db/init-db";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi, type PrasiContent } from "./prasi-var";
-
+import { join } from "path";
 export const init = async ({
   site_id,
   server,
@@ -75,29 +75,19 @@ export const init = async ({
     nova: init_prasi.paths.dir.nova,
   };
   prasi.site_id = site_id;
-  prasi.dev = dev; 
+  prasi.dev = dev;
 
   if (mode === "ipc") {
     if (action === "init") return;
-
-    // const vm_path = join(
-    //   backend_path,
-    //   basename(init_prasi.paths.server).replace(".ts", ".js")
-    // );
-    // const src = await Bun.file(vm_path).text();
-    // const glb = global as any;
-
-    // const script = new Script(src, { filename: vm_path });
-    // const module = { exports: { server: null as any } };
-
-    // const cjs = script.runInContext(glb);
-    // cjs(exports, require, module);
-    // prasi.server = module.exports.server;
-  } else {
-    delete require.cache[backend_path];
-    const module = require(backend_path);
-    prasi.server = module.server;
   }
+
+  const backend_file = join(
+    backend_path,
+    init_prasi.paths.server.replace(".ts", ".js")
+  );
+  delete require.cache[backend_file];
+  const module = require(backend_file);
+  prasi.server = module.server;
 
   process.chdir(backend_path);
 
@@ -119,7 +109,6 @@ export const init = async ({
       action === "reload" ? "Reloaded" : "Started"
     }.`
   );
-
   if (prasi.server?.init) {
     await prasi.server.init({ port: server_instance.port });
   }
@@ -128,4 +117,5 @@ export const init = async ({
     http: await createHttpHandler(prasi, mode === "ipc" ? "dev" : "prod"),
     ws: createWsHandler(),
   };
+  return prasi;
 };

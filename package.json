@@ -3,7 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun build --watch --target bun --format cjs --entry ./internal/main/init.ts --outdir ./internal/vm"
+    "dev": "mkdir internal/vm && cp internal/main/ipc.ts internal/vm && bun build --watch --target bun --format cjs --entry ./internal/main/init.ts --outdir ./internal/vm"
   },
   "devDependencies": {
     "@types/bun": "latest"
