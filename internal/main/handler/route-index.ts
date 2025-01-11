@@ -8,6 +8,7 @@ const default_route = {
   _cached: false,
   handle(site_id: string, pathname: string) {
     if (!this._cached || prasi.dev) {
+      prasi.build_id = Date.now();
       this._cached = true;
       const _cache = readFileSync(join(prasi.static.nova, "index.html"), {
         encoding: "utf-8",
@@ -28,6 +29,9 @@ const default_route = {
             return e.toString();
           })
           .filter((e) => e),
+        ...(prasi.index_html?.head || []).map((e) =>
+          e.replaceAll("[build_id]", prasi.build_id + "")
+        ),
       ];
     }
 
@@ -57,6 +61,7 @@ const default_route = {
   <div id="root"></div>
   <script>
     window._prasi = { 
+      build_id: ${prasi.build_id},
       basepath: "${base_path}/", 
       site_id: "${site_id}",${
       current.page_id ? `\n      page_id: "${current.page_id}",` : ""

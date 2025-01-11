@@ -25,7 +25,7 @@ const cwd = process.cwd();
 await init({
   mode: "server",
   db,
-  index_html: { exclude_default_css: true },
+  index_html: { exclude_default_css: true, head: [`<link href="/index.css?[build_id]" rel="stylesheet" />`] },
   prasi: {
     version: 5,
     paths: {
@@ -81,7 +81,7 @@ await init({
         {
           id: "default",
           url: "",
-          root: 'return "HALOHA"',
+          root: `return window.prasi_root`,
         },
       ];
     },

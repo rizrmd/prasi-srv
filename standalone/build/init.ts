@@ -18,15 +18,7 @@ export const initBuild = async () => {
   });
 
   const tailwind = spawn({
-    cmd: `bun tailwind -w -m`,
+    cmd: `bun tailwind -w -m -o app/index.build.css`,
     cwd: join(process.cwd(), "frontend"),
-    onMessage(arg) {
-      if (arg.from === "stdout") {
-        writeFileSync(
-          join(process.cwd(), "frontend", "app/index.build.css"),
-          arg.raw
-        );
-      }
-    },
   });
 };
