@@ -7,7 +7,7 @@ import { staticFile } from "utils/static";
 import { initDB } from "../db/init-db";
 import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
-import { prasi, type PrasiContent } from "./prasi-var";
+import { prasi, type PrasiContent, type PrasiGlobal } from "./prasi-var";
 import { join } from "path";
 export const init = async ({
   site_id,
@@ -17,10 +17,12 @@ export const init = async ({
   action,
   content,
   dev,
+  index_html,
   db,
 }: {
   site_id?: string;
   db: SiteConfig["db"];
+  index_html?: PrasiGlobal["index_html"];
   prasi: {
     version: number;
     paths: {
@@ -45,6 +47,7 @@ export const init = async ({
   content?: Partial<PrasiContent>;
 }) => {
   prasi.mode = mode;
+  if (index_html) prasi.index_html = index_html;
 
   if (content) prasi.content = content;
 

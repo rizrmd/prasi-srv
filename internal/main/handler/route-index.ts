@@ -7,7 +7,7 @@ const default_route = {
   _head: [] as string[],
   _cached: false,
   handle(site_id: string, pathname: string) {
-    if ((!this._cached && prasi.mode === "vm") || prasi.dev) {
+    if (!this._cached || prasi.dev) {
       this._cached = true;
       const _cache = readFileSync(join(prasi.static.nova, "index.html"), {
         encoding: "utf-8",
@@ -17,19 +17,27 @@ const default_route = {
         ...html.querySelectorAll("script").map((e) => {
           return e.toString();
         }),
-        ...html.querySelectorAll("link").map((e) => {
-          return e.toString();
-        }),
+        ...html
+          .querySelectorAll("link")
+          .map((e) => {
+            if (e.getAttribute("rel") === "stylesheet") {
+              if (prasi.index_html?.exclude_default_css === true) {
+                return "";
+              }
+            }
+            return e.toString();
+          })
+          .filter((e) => e),
       ];
     }
 
-    const base_path = prasi.mode === "vm" ? `/prod/${site_id}` : ``;
+    const base_path = prasi.mode === "ipc" ? `/prod/${site_id}` : ``;
     const current = {
       page_id: undefined as undefined | string,
       params: undefined as any,
     };
 
-    const found = prasi.content.route(pathname);
+    const found = prasi.content?.route?.(pathname);
     if (found) {
       current.page_id = found.data.page_id;
       current.params = found.params;

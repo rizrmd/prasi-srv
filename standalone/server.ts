@@ -21,9 +21,11 @@ if (existsSync(env_file)) {
 
 initBuild();
 
+const cwd = process.cwd();
 await init({
   mode: "server",
   db,
+  index_html: { exclude_default_css: true },
   prasi: {
     version: 5,
     paths: {
@@ -32,17 +34,16 @@ await init({
       internal: "internal.tsx",
       typings: "",
       dir: {
-        backend: "backend",
-        frontend: "frontend",
-        nova: "",
-        public: "public",
+        backend: join(cwd, "backend"),
+        frontend: join(cwd, "dist/frontend"),
+        nova: join(cwd, "system/nova"),
+        public: join(cwd, "frontend/public"),
         site: "",
-        upload: "upload",
+        upload: join(cwd, "upload"),
       },
     },
   },
   server: () => {
-    console.clear();
     return Bun.serve({
       websocket: prasi.handler.ws,
       fetch: async (req) => {
@@ -71,9 +72,18 @@ await init({
       return {
         params: {},
         data: {
-          page_id: "default"
-        }
-      }
+          page_id: "default",
+        },
+      };
+    },
+    async pages(ids) {
+      return [
+        {
+          id: "default",
+          url: "",
+          root: 'return "HALOHA"',
+        },
+      ];
     },
   },
 });
