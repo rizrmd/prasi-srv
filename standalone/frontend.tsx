@@ -1,3 +1,3 @@
-export const startFrontend = () => {
+export const initFrontend = () => {
   console.log("haloha");
 };
