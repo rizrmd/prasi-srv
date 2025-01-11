@@ -149,6 +149,7 @@ const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
       chunk: "[name]-[hash].[ext]",
       asset: "[name]-[hash].[ext]",
     },
+    html: true,
     format: "esm",
     experimentalCss: true,
     splitting: true,
