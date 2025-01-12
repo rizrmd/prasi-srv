@@ -1,8 +1,6 @@
-import { spawn } from "utils/spawn";
-import { prasiBuildFrontEnd } from "./frontend";
-import { join } from "path";
-import { writeFileSync } from "fs";
 import { removeAsync } from "fs-jetpack";
+import { join } from "path";
+import { prasiBuildFrontEnd } from "./frontend";
 
 export const initBuild = async () => {
   await removeAsync(join(process.cwd(), "dist/frontend"));
@@ -17,8 +15,13 @@ export const initBuild = async () => {
     },
   });
 
-  const tailwind = spawn({
-    cmd: `bun tailwind -w -m -o app/index.build.css`,
+  const tailwind = Bun.spawn({
+    cmd: `bun tailwind -i app/index.css -w -m -o app/index.build.css`.split(
+      " "
+    ),
     cwd: join(process.cwd(), "frontend"),
+    stdin: "inherit",
+    stderr: "ignore",
+    stdout: "ignore",
   });
 };

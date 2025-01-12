@@ -36,7 +36,11 @@ export const prasi = (globalThis as any).prasi as unknown as {
   build_id: number;
   mode: "ipc" | "server";
   dev?: boolean;
-  index_html?: { exclude_default_css?: boolean; head?: string[] };
+  index_html?: {
+    exclude_default_css?: boolean;
+    head?: string[];
+    root_wrap: "prasi" | "clean";
+  };
   ext: {
     kv?: BunSqliteKeyValue;
     firebase?: {

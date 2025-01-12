@@ -25,7 +25,11 @@ const cwd = process.cwd();
 await init({
   mode: "server",
   db,
-  index_html: { exclude_default_css: true, head: [`<link href="/index.css?[build_id]" rel="stylesheet" />`] },
+  index_html: {
+    exclude_default_css: true,
+    head: [`<link href="/index.css?[build_id]" rel="stylesheet" />`],
+    root_wrap: "clean",
+  },
   prasi: {
     version: 5,
     paths: {

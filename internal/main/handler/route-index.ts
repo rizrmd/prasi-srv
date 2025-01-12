@@ -46,6 +46,9 @@ const default_route = {
       current.page_id = found.data.page_id;
       current.params = found.params;
     }
+
+    const root_wrap = prasi.index_html?.root_wrap || "prasi";
+
     return `\
 <!DOCTYPE html>
 <html lang="en">
@@ -63,6 +66,7 @@ const default_route = {
     window._prasi = { 
       build_id: ${prasi.build_id},
       basepath: "${base_path}/", 
+      root_wrap: "${root_wrap}",
       site_id: "${site_id}",${
       current.page_id ? `\n      page_id: "${current.page_id}",` : ""
     }${
