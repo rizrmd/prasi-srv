@@ -1,11 +1,11 @@
+import * as zstd from "@bokuweb/zstd-wasm";
+import type { BunFile } from "bun";
 import { type PrasiGlobal } from "main/prasi-var";
+import mime from "mime";
 import { join } from "path";
 import type { PrasiHttpHandler } from "typings/server";
-import { route_api } from "./route-api";
+import { internal_prasi_api } from "./api-internal";
 import { route_index } from "./route-index";
-import type { BunFile } from "bun";
-import * as zstd from "@bokuweb/zstd-wasm";
-import mime from "mime";
 
 const encoder = new TextEncoder();
 export const createHttpHandler = async (
@@ -45,11 +45,29 @@ export const createHttpHandler = async (
           result.body = Bun.file(public_file.data.fullpath);
           is_file = true;
         } else {
-          const api = await route_api.handle(this.url, req, prasi);
-          if (api) {
-            result.body = api.body;
-            result.headers = api.headers;
-            result.status = api.status;
+          const api_result = await internal_prasi_api.handle(
+            this.url,
+            req,
+            prasi
+          );
+          if (api_result) {
+            result.body = api_result.body;
+            result.headers = api_result.headers;
+            result.status = api_result.status;
+          }
+
+          if (prasi.handler.api) {
+            const api_result = await prasi.handler.api.handle(
+              this.url,
+              req,
+              prasi
+            );
+
+            if (api_result) {
+              result.body = api_result.body;
+              result.headers = api_result.headers;
+              result.status = api_result.status;
+            }
           }
         }
       }

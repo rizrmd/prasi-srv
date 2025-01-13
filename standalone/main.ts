@@ -1,8 +1,9 @@
+import { existsSync, readdirSync } from "fs";
+import { standalone_api } from "main/handler/api-standalone";
 import { init } from "main/init";
 import { prasi } from "main/prasi-var";
 import { join } from "path";
 import { initBuild } from "./build/init";
-import { existsSync, readdirSync } from "fs";
 
 let db = null as any;
 const env_file = join(process.cwd(), "backend", ".env");
@@ -20,11 +21,16 @@ if (existsSync(env_file)) {
 }
 
 initBuild();
+await standalone_api.rescan();
+prasi.handler = { api: standalone_api } as any;
 
 const cwd = process.cwd();
 
 let head: string[] = [];
 const dist_frontend = join(cwd, "dist/frontend");
+if (!existsSync(dist_frontend)) {
+  require("fs").mkdirSync(dist_frontend, { recursive: true });
+}
 if (existsSync(dist_frontend)) {
   const files = readdirSync(dist_frontend);
   const css_file = files.find(

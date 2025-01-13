@@ -9,6 +9,7 @@ import { createHttpHandler } from "./handler/http-handler";
 import { createWsHandler } from "./handler/ws-handler";
 import { prasi, type PrasiContent, type PrasiGlobal } from "./prasi-var";
 import { join } from "path";
+import { createRouter } from "rou3";
 export const init = async ({
   site_id,
   server,
@@ -70,8 +71,8 @@ export const init = async ({
 
   await initDB(db);
 
-  const { route_api: api_route } = await import("./handler/route-api");
-  await api_route.init();
+  const { internal_prasi_api } = await import("./handler/api-internal");
+  await internal_prasi_api.rescan();
 
   prasi.static = {
     frontend: await staticFile(frontend_dir),
@@ -107,6 +108,7 @@ export const init = async ({
   }
 
   prasi.handler = {
+    ...prasi.handler,
     http: await createHttpHandler(prasi, mode === "ipc" ? "dev" : "prod"),
     ws: createWsHandler(),
   };

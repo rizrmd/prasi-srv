@@ -2,10 +2,12 @@ import type { WebSocketHandler } from "bun";
 import type { BunSqliteKeyValue } from "bun-sqlite-key-value";
 import type { Database } from "bun:sqlite";
 import type { initializeApp } from "firebase-admin";
+import type { RouterContext } from "rou3";
 import type { IPage } from "typings/content";
 import type { PrasiServer } from "typings/server";
 import { type SiteConfig } from "utils/deploy-config";
 import type { StaticFile } from "utils/static";
+import type { standalone_api } from "./handler/api-standalone";
 
 if (!(globalThis as any).prasi) {
   (globalThis as any).prasi = {};
@@ -54,6 +56,7 @@ export const prasi = (globalThis as any).prasi as unknown as {
   };
   server?: PrasiServer;
   handler: {
+    api?: typeof standalone_api;
     http: (req: Request) => Promise<Response>;
     ws: WebSocketHandler<{ url: URL }>;
   };

@@ -1,10 +1,5 @@
-import { $ } from "bun";
-import { readdirSync } from "fs";
-import { readAsync, removeAsync, writeAsync } from "fs-jetpack";
 import { apiContext, type ApiResponse } from "utils/api-context";
-import { config as _config, type SiteConfig } from "utils/deploy-config";
-import { fs } from "utils/fs";
-import { genEnv, parseEnv } from "utils/parse-env";
+import { type SiteConfig } from "utils/deploy-config";
 
 export const _ = {
   url: "/_deploy",
