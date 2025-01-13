@@ -4,6 +4,7 @@ import { init } from "main/init";
 import { prasi } from "main/prasi-var";
 import { join } from "path";
 import { initBuild } from "./build/init";
+import { watchApi } from "./build/backend";
 
 let db = null as any;
 const env_file = join(process.cwd(), "backend", ".env");
@@ -23,6 +24,7 @@ if (existsSync(env_file)) {
 initBuild();
 await standalone_api.rescan();
 prasi.handler = { api: standalone_api } as any;
+watchApi()
 
 const cwd = process.cwd();
 
