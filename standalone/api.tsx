@@ -29,6 +29,7 @@ export const apiResult = <T extends any[], R extends any>(
     status: "init",
     error: "",
     result: null as R,
+    data: null as R,
     async call(...args: T) {
       const [key, local] = (this as any)._bind as [
         string,
@@ -46,6 +47,7 @@ export const apiResult = <T extends any[], R extends any>(
         local.set((data) => {
           data[key].status = "done";
           data[key].result = result;
+          data[key].data = result;
         });
 
         if (opt?.onResult) {
@@ -68,6 +70,7 @@ export const apiResult = <T extends any[], R extends any>(
     error: string;
     status: ApiStatus;
     result: Awaited<R>;
+    data: Awaited<R>;
     call: (typeof api)["call"];
   };
 
