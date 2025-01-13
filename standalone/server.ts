@@ -23,11 +23,16 @@ initBuild();
 
 const cwd = process.cwd();
 
-const files = readdirSync(join(process.cwd(), "dist/frontend"));
-const css_file = files.find((e) => e.startsWith("index") && e.endsWith(".css"));
 let head: string[] = [];
-if (css_file) {
-  head = [`<link href="/${css_file}" rel="stylesheet" />`];
+const dist_frontend = join(cwd, "dist/frontend");
+if (existsSync(dist_frontend)) {
+  const files = readdirSync(dist_frontend);
+  const css_file = files.find(
+    (e) => e.startsWith("index") && e.endsWith(".css")
+  );
+  if (css_file) {
+    head = [`<link href="/${css_file}" rel="stylesheet" />`];
+  }
 }
 
 await init({
@@ -78,7 +83,7 @@ await init({
         },
         site: { id: "default", api_url: "" },
         urls: [],
-        not_found_eval: 'return window.prasi_root'
+        not_found_eval: "return window.prasi_root",
       };
     },
     route(pathname) {
