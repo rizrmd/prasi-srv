@@ -77,7 +77,8 @@ await init({
           },
         },
         site: { id: "default", api_url: "" },
-        urls: [{ id: "default", url: "/" }],
+        urls: [],
+        not_found_eval: 'return window.prasi_root'
       };
     },
     route(pathname) {
