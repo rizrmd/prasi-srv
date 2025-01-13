@@ -2,7 +2,7 @@ import { init } from "main/init";
 import { prasi } from "main/prasi-var";
 import { join } from "path";
 import { initBuild } from "./build/init";
-import { existsSync } from "fs";
+import { existsSync, readdirSync } from "fs";
 
 let db = null as any;
 const env_file = join(process.cwd(), "backend", ".env");
@@ -22,12 +22,20 @@ if (existsSync(env_file)) {
 initBuild();
 
 const cwd = process.cwd();
+
+const files = readdirSync(join(process.cwd(), "dist/frontend"));
+const css_file = files.find((e) => e.startsWith("index") && e.endsWith(".css"));
+let head: string[] = [];
+if (css_file) {
+  head = [`<link href="/${css_file}" rel="stylesheet" />`];
+}
+
 await init({
   mode: "server",
   db,
   index_html: {
     exclude_default_css: true,
-    head: [`<link href="/index.css?[build_id]" rel="stylesheet" />`],
+    head,
     root_wrap: "clean",
   },
   prasi: {

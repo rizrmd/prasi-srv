@@ -1,15 +1,20 @@
 import { readFileSync } from "fs";
-import { prasi } from "main/prasi-var";
+import { type PrasiGlobal } from "main/prasi-var";
 import { parse } from "node-html-parser";
 import { join } from "path";
 
 const default_route = {
   _head: [] as string[],
-  _cached: false,
-  handle(site_id: string, pathname: string) {
-    if (!this._cached || prasi.dev) {
+  handle(site_id: string, pathname: string, prasi: PrasiGlobal) {
+    let index_html = prasi.index_html;
+    if (!index_html) {
+      prasi.index_html = { root_wrap: "prasi" };
+      index_html = prasi.index_html;
+    }
+
+    if (!index_html.cached || prasi.dev) {
       prasi.build_id = Date.now();
-      this._cached = true;
+      index_html.cached = true;
       const _cache = readFileSync(join(prasi.static.nova, "index.html"), {
         encoding: "utf-8",
       });
@@ -22,14 +27,14 @@ const default_route = {
           .querySelectorAll("link")
           .map((e) => {
             if (e.getAttribute("rel") === "stylesheet") {
-              if (prasi.index_html?.exclude_default_css === true) {
+              if (index_html.exclude_default_css === true) {
                 return "";
               }
             }
             return e.toString();
           })
           .filter((e) => e),
-        ...(prasi.index_html?.head || []).map((e) =>
+        ...(index_html.head || []).map((e) =>
           e.replaceAll("[build_id]", prasi.build_id + "")
         ),
       ];

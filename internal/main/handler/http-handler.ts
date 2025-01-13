@@ -61,7 +61,7 @@ export const createHttpHandler = async (
     }
 
     if (result.body === null) {
-      result.body = route_index.handle(prasi.site_id, url.pathname);
+      result.body = route_index.handle(prasi.site_id, url.pathname, prasi);
       head(result, "content-type", "text/html");
     }
 

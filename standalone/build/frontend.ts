@@ -151,7 +151,7 @@ const bunBuild = async ({ outdir, entrypoint, entrydir }: BuildArg) => {
     },
     html: true,
     format: "esm",
-    experimentalCss: true,
+    experimentalCss: false,
     splitting: true,
     minify: true,
 

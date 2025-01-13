@@ -39,6 +39,7 @@ export const prasi = (globalThis as any).prasi as unknown as {
   index_html?: {
     exclude_default_css?: boolean;
     head?: string[];
+    cached?: boolean;
     root_wrap: "prasi" | "clean";
   };
   ext: {
