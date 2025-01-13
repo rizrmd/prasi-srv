@@ -54,30 +54,41 @@ export const defineApiBase = ({ path: base_path }: { path: string }) => {
             } catch (e) {}
           }
 
-          const res = await fn.bind({ req, params, url, prasi })(...arg_val);
+          try {
+            const res = await fn.bind({ req, params, url, prasi })(...arg_val);
 
-          if (typeof res.headers === "object" && res.headers) {
-            if (res instanceof Response) {
-              return res;
-            }
+            if (typeof res.headers === "object" && res.headers) {
+              if (res instanceof Response) {
+                return res;
+              }
 
-            if (
-              res.headers["content-type"] === "application/json" &&
-              typeof res.body === "object"
-            ) {
+              if (
+                res.headers["content-type"] === "application/json" &&
+                typeof res.body === "object"
+              ) {
+                return {
+                  body: JSON.stringify(res.body),
+                  headers: res.headers,
+                  status: res.status,
+                };
+              }
+            } else if (res.body && res.headers && res.status) {
               return {
-                body: JSON.stringify(res.body),
+                body: res.body,
                 headers: res.headers,
                 status: res.status,
               };
             }
-          } else if (res.body && res.headers && res.status) {
-            return { body: res.body, headers: res.headers, status: res.status };
-          }
 
-          if (typeof res === "object" && res) {
+            if (typeof res === "object" && res) {
+              return {
+                body: JSON.stringify(res),
+                headers: { "content-type": "application/json", status: 200 },
+              };
+            }
+          } catch (e: any) {
             return {
-              body: JSON.stringify(res),
+              body: JSON.stringify({ __error: e.message }),
               headers: { "content-type": "application/json", status: 200 },
             };
           }
